@@ -49,6 +49,25 @@ Les anciens modèles (`gemini-embedding-exp-03-07`, `text-embedding-004`) sont d
 
 ---
 
+## B7 — Endpoints REST + SSE (implémenté)
+
+**Choix : `asyncio.Queue` + `put_nowait` comme pont callback→SSE**
+
+L'agent récursif utilise un callback synchrone `event_cb(SSEEvent) -> None` (choix initial fait pour la testabilité des agents). Pour brancher ça sur FastAPI SSE :
+- `POST /search` crée une `asyncio.Queue`, injecte `queue.put_nowait` comme `event_cb`, lance `build_arbre()` via `asyncio.create_task()`.
+- `GET /stream/{session_id}` consomme la queue dans un generator async → `StreamingResponse(media_type="text/event-stream")`.
+- `GET /tree/{session_id}` retourne l'`Arbre` JSON stocké en mémoire (202 si encore en cours).
+
+**Pourquoi pas un `asyncio.Queue` async dans l'agent ?** Le `put_nowait()` synchrone fonctionne car l'agent tourne dans le même event loop que FastAPI — pas besoin de `await queue.put()`. Ça préserve la signature synchrone du callback qui simplifie les tests unitaires.
+
+**Sentinel double** : `build_arbre` émet `DoneEvent` (signal applicatif), puis le `finally` met `None` dans la queue (filet de sécurité si exception avant `DoneEvent`). Le generator SSE casse sur l'un ou l'autre en premier.
+
+**Session store** : dict in-memory `_sessions`, suffisant pour le hackathon (pas de TTL, pas de persistence).
+
+**Résultats** : 76 tests passent (8 nouveaux pour les endpoints).
+
+---
+
 ## POC validé
 
 **Acte de naissance — Prudence Aimée PINÇON, 3 mars 1843, Neuilly-en-Sancerre (Cher)**
