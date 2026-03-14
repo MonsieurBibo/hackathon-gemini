@@ -2,8 +2,9 @@
 Service Gemini — wrapper autour de google-genai 1.x.
 
 Modèles utilisés :
-- OCR / génération : gemini-2.5-pro
-- Embeddings       : gemini-embedding-2-preview (multimodal texte+image, 3072 dims)
+- OCR / vision      : gemini-3.1-flash-preview (~4 000 pages/$1, voir docs/project/models.md)
+- Raisonnement      : gemini-3.1-pro-preview (désambiguïsation, contexte 1M)
+- Embeddings        : gemini-embedding-2-preview (multimodal texte+image, 3072 dims)
 
 Ref tâche : B3 (docs/tasks/backend.md)
 Ref modèles : docs/project/models.md
@@ -35,7 +36,7 @@ async def ocr_image(
     if stream_callback:
         full = []
         async for chunk in client.aio.models.generate_content_stream(
-            model="gemini-2.5-pro", contents=contents
+            model="gemini-3.1-flash-preview", contents=contents
         ):
             if chunk.text:
                 stream_callback(chunk.text)
@@ -43,7 +44,7 @@ async def ocr_image(
         return "".join(full)
     else:
         response = await client.aio.models.generate_content(
-            model="gemini-2.5-pro", contents=contents
+            model="gemini-3.1-flash-preview", contents=contents
         )
         return response.text
 
@@ -70,6 +71,6 @@ async def answer_admin_question(context: str, question: str) -> str:
     client = get_client()
     prompt = f"Contexte :\n{context}\n\nQuestion : {question}"
     response = await client.aio.models.generate_content(
-        model="gemini-2.5-pro", contents=prompt
+        model="gemini-3.1-pro-preview", contents=prompt
     )
     return response.text

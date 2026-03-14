@@ -7,47 +7,64 @@ Ref API      : docs/arkotheque/api-old.md
 Ref IDs      : docs/arkotheque/departments.md
 Ref contrats : docs/tasks/contracts.md
 
-Points critiques :
-- Les filtres DOIVENT inclure [op]=AND et [extras][mode]=select (cf. api-old.md)
-- Les valeurs de filtres commune/date incluent un hash : "Neuilly[[arko_fiche_xyz]]"
-- Les valeurs exactes se découvrent via les aggregations d'une requête sans filtre
-- Sur certains moteurs "browse", le filtrage est côté client (Indre moteur 36)
-  → il faut paginer et filtrer localement (non implémenté ici, géré dans B5)
+Points critiques (découvertes 2026-03-14) :
+- La réponse search retourne {total, results[]} — pas {hits:{hits:[]}}
+- aggregations est une LISTE, pas un dict
+- Le total affiché est toujours faux (non-filtré) ; seuls results[] sont filtrés
+- Filtre commune : clé = filtres[i].refUnique du moteur (pas le fieldName d'agg)
+  - mode="input" + valeur plain (Cher 18)
+  - mode="select" + valeur avec hash (Ardennes 08)
+- contenuIds[0] obligatoire pour le Cher ; absent du moteur metadata pour autres depts
+- idArkoFile se récupère via render-fiche → data-visionneuse JSON dans le HTML
+- Filtrage année/type : côté client depuis intitule (ex: "3E 2346 1843 - 1852")
 """
 from __future__ import annotations
+
+import json
+import re
+
 import httpx
 
+
 # ---------------------------------------------------------------------------
-# Config par département : base_url + IDs moteur état civil
+# Config par département
 # ---------------------------------------------------------------------------
 DEPT_CONFIG: dict[str, dict] = {
     "18": {
         "base_url": "https://www.archives18.fr",
         "moteur_id": 1,
         "moteur_ref": "arko_default_61011a8e5db65",
+        "contenu_id": "2655739",
+        "restitution_ref": "arko_default_61011eb03aad2",
         "filter_commune": "arko_default_61011b4c3eacb",
-        "filter_annee": "arko_default_61011b4c62fc5",
+        "filter_commune_mode": "input",   # valeur plain, sans hash
     },
     "08": {
         "base_url": "https://archives.cd08.fr",
         "moteur_id": 6,
         "moteur_ref": "arko_default_6776ac3012e9d",
+        "contenu_id": None,              # TODO : scraper depuis HTML
+        "restitution_ref": "arko_default_6776af9fd9f6f",
         "filter_commune": "arko_default_6776acf636161",
-        "filter_annee": "arko_default_6776acf64bf69",
+        "filter_commune_mode": "select",  # valeur avec hash [[arko_fiche_xxx]]
     },
     "36": {
         "base_url": "https://www.archives36.fr",
         "moteur_id": 8,
         "moteur_ref": "arko_default_61a0ae5412613",
+        "contenu_id": None,
+        "restitution_ref": None,
         "filter_commune": None,
-        "filter_annee": None,
+        "filter_commune_mode": None,
     },
     "54": {
         "base_url": "https://archivesenligne.meurthe-et-moselle.fr",
         "moteur_id": 1,
         "moteur_ref": "arko_default_62bc69358b041",
+        "contenu_id": None,
+        "restitution_ref": None,
         "filter_commune": None,
-        "filter_annee": None,
+        "filter_commune_mode": None,
     },
 }
 
@@ -69,11 +86,12 @@ async def detect_version(base_url: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Recherche des registres (moteur browse)
+# Helpers filtres (conservés pour mode select + découverte aggregations)
 # ---------------------------------------------------------------------------
 def _build_filter_params(
     moteur_ref: str,
-    filters: list[tuple[str, str]],  # [(filter_ref, value), ...]
+    filters: list[tuple[str, str]],
+    mode: str = "select",
 ) -> dict:
     """Construit les query params au format Arkotheque complet."""
     params: dict[str, str] = {
@@ -84,28 +102,104 @@ def _build_filter_params(
         prefix = f"{moteur_ref}--filtreGroupes[groupes][{i}][{filter_ref}]"
         params[f"{prefix}[q][0]"] = value
         params[f"{prefix}[op]"] = "AND"
-        params[f"{prefix}[extras][mode]"] = "select"
+        params[f"{prefix}[extras][mode]"] = mode
     return params
 
 
-async def _get_aggregations(base_url: str, moteur_id: int) -> dict:
-    """Récupère les valeurs de filtres disponibles via les aggregations."""
-    async with httpx.AsyncClient(timeout=15) as client:
-        resp = await client.get(f"{base_url}/_recherche-api/search/{moteur_id}")
-        resp.raise_for_status()
-        return resp.json().get("aggregations", {})
+def _get_aggregations(data: dict) -> list[dict]:
+    """Retourne aggregations comme liste (format réel de l'API)."""
+    aggs = data.get("aggregations", [])
+    if isinstance(aggs, dict):
+        # Compatibilité avec les mocks de tests
+        return [aggs]
+    return aggs
 
 
-def _find_bucket_value(aggregations: dict, field_ref: str, term: str) -> str | None:
+def _find_bucket_value(aggregations: list[dict], field_ref: str, term: str) -> str | None:
     """Trouve la valeur exacte (avec hash) d'un terme dans les aggregations."""
-    bucket_key = f"{field_ref}_terms"
-    for agg in aggregations.values():
-        if bucket_key in agg:
-            for bucket in agg[bucket_key].get("buckets", []):
-                key: str = bucket.get("key", "")
-                if term.lower() in key.lower():
-                    return key
+    for agg in aggregations:
+        sub = agg.get(field_ref, {})
+        for key, val in sub.items():
+            if isinstance(val, dict) and "buckets" in val:
+                for bucket in val["buckets"]:
+                    key_str: str = str(bucket.get("key", ""))
+                    if term.lower() in key_str.lower():
+                        return key_str
     return None
+
+
+def _find_period_bucket(
+    aggregations: list[dict], filter_ref: str, annee_debut: int, annee_fin: int
+) -> str | None:
+    """Trouve le bucket de période qui couvre l'intervalle cible."""
+    best: str | None = None
+    for agg in aggregations:
+        sub = agg.get(filter_ref, {})
+        for key, val in sub.items():
+            if isinstance(val, dict) and "buckets" in val:
+                for bucket in val["buckets"]:
+                    key_str: str = str(bucket.get("key", ""))
+                    part = key_str.split("[[")[0].strip()
+                    if "-" in part:
+                        try:
+                            start, end = (int(x) for x in part.split("-"))
+                            if start <= annee_fin and end >= annee_debut:
+                                best = key_str
+                        except ValueError:
+                            continue
+    return best
+
+
+# ---------------------------------------------------------------------------
+# Recherche principale
+# ---------------------------------------------------------------------------
+def _covers_year_range(intitule: str, annee_debut: int, annee_fin: int) -> bool:
+    """Vérifie si un intitulé de registre couvre la période cible."""
+    match = re.search(r"(\d{4})\s*[-–]\s*(\d{4})", intitule)
+    if match:
+        start, end = int(match.group(1)), int(match.group(2))
+        return start <= annee_fin and end >= annee_debut
+    match = re.search(r"(\d{4})", intitule)
+    if match:
+        year = int(match.group(1))
+        return annee_debut <= year <= annee_fin
+    return False
+
+
+async def _fetch_id_arko_file(
+    base_url: str, moteur_ref: str, fiche_ref: str, restitution_ref: str
+) -> tuple[int | None, str | None]:
+    """
+    Appelle render-fiche et extrait idArkoFile + fieldRef depuis data-visionneuse.
+    Retourne (None, None) si non trouvé.
+    """
+    url = (
+        f"{base_url}/_recherche-api/render-fiche"
+        f"/{moteur_ref}/{fiche_ref}/{restitution_ref}/detail/html"
+    )
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.get(url)
+        if resp.status_code != 200:
+            return None, None
+    m = re.search(r'data-visionneuse="([^"]+)"', resp.text)
+    if not m:
+        return None, None
+    try:
+        vis = json.loads(m.group(1).replace("&quot;", '"'))
+        return vis.get("idArkoFile"), vis.get("refUniqueField")
+    except (json.JSONDecodeError, AttributeError):
+        return None, None
+
+
+def _parse_hit(result: dict, id_arko_file: int | None, field_ref: str | None) -> dict:
+    return {
+        "fiche_id": result.get("id"),
+        "titre": result.get("intitule", ""),
+        "refUnique": result.get("refUnique", ""),
+        "id_arko_file": id_arko_file,
+        "field_ref": field_ref,
+        "raw": result,
+    }
 
 
 async def search_acte(
@@ -115,80 +209,92 @@ async def search_acte(
     annee_fin: int,
 ) -> list[dict]:
     """
-    Cherche les registres d'état civil pour une commune et une période.
-    Retourne une liste de fiches (registres).
+    Cherche les registres d'état civil couvrant une commune et une période.
+
+    Retourne une liste de hits, chacun contenant :
+      fiche_id, titre, refUnique, id_arko_file, field_ref, raw
     """
     cfg = get_config(dept)
     base_url = cfg["base_url"]
     moteur_id = cfg["moteur_id"]
     moteur_ref = cfg["moteur_ref"]
 
-    filters: list[tuple[str, str]] = []
+    params: dict[str, str] = {
+        f"{moteur_ref}--filtreGroupes[operator]": "AND",
+        f"{moteur_ref}--filtreGroupes[mode]": "simple",
+    }
+    if cfg.get("contenu_id"):
+        params[f"{moteur_ref}--contenuIds[0]"] = cfg["contenu_id"]
 
-    # Commune
-    if cfg["filter_commune"]:
-        aggs = await _get_aggregations(base_url, moteur_id)
-        commune_value = _find_bucket_value(aggs, cfg["filter_commune"], commune)
-        if commune_value:
-            filters.append((cfg["filter_commune"], commune_value))
-
-        # Période : cherche le bucket qui contient l'année cible
-        if cfg["filter_annee"]:
-            period_value = _find_period_bucket(aggs, cfg["filter_annee"], annee_debut, annee_fin)
-            if period_value:
-                filters.append((cfg["filter_annee"], period_value))
-
-    params = _build_filter_params(moteur_ref, filters)
+    if cfg.get("filter_commune") and commune:
+        fc = cfg["filter_commune"]
+        mode = cfg.get("filter_commune_mode") or "input"
+        params[f"{moteur_ref}--filtreGroupes[groupes][0][{fc}][q][0]"] = commune
+        params[f"{moteur_ref}--filtreGroupes[groupes][0][{fc}][op]"] = "AND"
+        params[f"{moteur_ref}--filtreGroupes[groupes][0][{fc}][extras][mode]"] = mode
 
     async with httpx.AsyncClient(timeout=15) as client:
         resp = await client.get(
-            f"{base_url}/_recherche-api/search/{moteur_id}",
-            params=params,
+            f"{base_url}/_recherche-api/search/{moteur_id}", params=params
         )
         resp.raise_for_status()
         data = resp.json()
 
-    hits = data.get("hits", {}).get("hits", [])
-    return [_parse_hit(h) for h in hits]
+    results = data.get("results", [])
 
+    # Filtrage local par année (le serveur ne filtre pas l'année)
+    matching = [
+        r for r in results
+        if _covers_year_range(r.get("intitule", ""), annee_debut, annee_fin)
+    ]
 
-def _find_period_bucket(
-    aggregations: dict, filter_ref: str, annee_debut: int, annee_fin: int
-) -> str | None:
-    """Trouve le bucket de période qui couvre l'intervalle cible."""
-    bucket_key = f"{filter_ref}_terms"
-    best: str | None = None
-    for agg in aggregations.values():
-        if bucket_key in agg:
-            for bucket in agg[bucket_key].get("buckets", []):
-                key: str = bucket.get("key", "")
-                # Format : "1813-1822[[hash]]"
-                part = key.split("[[")[0]
-                if "-" in part:
-                    try:
-                        start, end = (int(x) for x in part.split("-"))
-                        if start <= annee_fin and end >= annee_debut:
-                            best = key
-                    except ValueError:
-                        continue
-    return best
+    if not matching:
+        return []
 
+    # Pour chaque registre : récupérer idArkoFile via render-fiche
+    hits: list[dict] = []
+    restitution_ref = cfg.get("restitution_ref")
+    if restitution_ref:
+        for r in matching:
+            id_arko_file, field_ref = await _fetch_id_arko_file(
+                base_url, moteur_ref, r["refUnique"], restitution_ref
+            )
+            hits.append(_parse_hit(r, id_arko_file, field_ref))
+    else:
+        hits = [_parse_hit(r, None, None) for r in matching]
 
-def _parse_hit(hit: dict) -> dict:
-    src = hit.get("_source", {})
-    return {
-        "fiche_id": hit.get("_id"),
-        "titre": src.get("titre") or src.get("label") or "",
-        "commune": src.get("commune") or "",
-        "annee_debut": src.get("anneeDebut") or src.get("date_debut"),
-        "annee_fin": src.get("anneeFin") or src.get("date_fin"),
-        "cote": src.get("cote") or "",
-        "raw": src,
-    }
+    return hits
 
 
 # ---------------------------------------------------------------------------
-# Fiche + images
+# Images
+# ---------------------------------------------------------------------------
+def get_images_for_hit(base_url: str, hit: dict, max_pages: int = 400) -> list[str]:
+    """
+    Construit les URLs d'images pour un registre.
+
+    max_pages est un plafond de sécurité. L'agent OCR s'arrête dès qu'il
+    trouve l'acte ou lorsqu'une page retourne 404.
+    """
+    fiche_id = hit.get("fiche_id")
+    id_arko_file = hit.get("id_arko_file")
+    if not fiche_id or not id_arko_file:
+        return []
+    return [
+        f"{base_url}/_recherche-images/show/{fiche_id}/image/{id_arko_file}/{i}"
+        for i in range(max_pages)
+    ]
+
+
+async def get_image_bytes(url: str) -> bytes:
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.get(url)
+        resp.raise_for_status()
+        return resp.content
+
+
+# ---------------------------------------------------------------------------
+# Fiche + visionneuse (endpoints secondaires conservés)
 # ---------------------------------------------------------------------------
 async def get_fiche(base_url: str, moteur_ref: str, fiche_ref: str, restitution_ref: str) -> dict:
     async with httpx.AsyncClient(timeout=10) as client:
@@ -196,22 +302,7 @@ async def get_fiche(base_url: str, moteur_ref: str, fiche_ref: str, restitution_
             f"{base_url}/_recherche-api/render-fiche/{moteur_ref}/{fiche_ref}/{restitution_ref}/detail/html"
         )
         resp.raise_for_status()
-        return resp.json()
-
-
-async def get_image_urls(
-    base_url: str,
-    moteur_ref: str,
-    fiche_ref: str,
-    field_ref: str,
-    id_arko_file: int,
-    nb_pages: int,
-) -> list[str]:
-    """Construit les URLs d'images pour toutes les pages d'un registre."""
-    return [
-        f"{base_url}/_recherche-images/show/{fiche_ref}/image/{id_arko_file}/{i}"
-        for i in range(nb_pages)
-    ]
+        return {"html": resp.text}
 
 
 async def get_visionneuse_infos(
@@ -223,54 +314,3 @@ async def get_visionneuse_infos(
         )
         resp.raise_for_status()
         return resp.json()
-
-
-async def get_image_bytes(url: str) -> bytes:
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(url)
-        resp.raise_for_status()
-        return resp.content
-
-
-def _extract_image_ref(raw: dict) -> tuple[int | None, int | None]:
-    """
-    Extrait (id_arko_file, nb_pages) depuis le _source d'un hit Elasticsearch.
-
-    Arkotheque ne documente pas les noms de champs internes ; on essaie
-    les variantes connues. Retourne (None, None) si non trouvé.
-    """
-    id_arko_file = (
-        raw.get("idArkoFile")
-        or raw.get("id_arko_file")
-        or raw.get("imageId")
-        or raw.get("image_id")
-        or raw.get("idFichier")
-    )
-    nb_pages = (
-        raw.get("nbrPages")
-        or raw.get("nbPages")
-        or raw.get("nb_pages")
-        or raw.get("nombrePages")
-        or raw.get("nbrePages")
-    )
-    return id_arko_file, nb_pages
-
-
-def get_images_for_hit(base_url: str, hit: dict) -> list[str]:
-    """
-    Construit les URLs d'images pour un registre à partir d'un hit parsé.
-
-    Retourne [] si les métadonnées image sont absentes du hit
-    (cas de certains moteurs "browse" où le filtrage est côté client).
-    Dans ce cas, l'agent récursif doit ignorer ce registre ou tenter
-    une autre stratégie (ex : pagination + filtrage local, cf. B5).
-    """
-    fiche_id = hit.get("fiche_id")
-    raw = hit.get("raw", {})
-    id_arko_file, nb_pages = _extract_image_ref(raw)
-    if not fiche_id or not id_arko_file or not nb_pages:
-        return []
-    return [
-        f"{base_url}/_recherche-images/show/{fiche_id}/image/{id_arko_file}/{i}"
-        for i in range(int(nb_pages))
-    ]
