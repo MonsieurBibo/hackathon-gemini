@@ -43,10 +43,13 @@ DEPT_CONFIG: dict[str, dict] = {
         "base_url": "https://archives.cd08.fr",
         "moteur_id": 6,
         "moteur_ref": "arko_default_6776ac3012e9d",
-        "contenu_id": None,              # TODO : scraper depuis HTML
+        "contenu_id": None,
         "restitution_ref": "arko_default_6776af9fd9f6f",
-        "filter_commune": "arko_default_6776acf636161",
-        "filter_commune_mode": "select",  # valeur avec hash [[arko_fiche_xxx]]
+        "filter_commune": "arko_default_6776acf636161",      # filtres[i].refUnique → clé param
+        "filter_commune_agg": "arko_default_67764c817422f",  # fieldName agg → chercher bucket
+        "filter_commune_mode": "select",                     # valeur avec hash [[arko_fiche_xxx]]
+        "filter_annee": "arko_default_6776acf64bf69",        # filtres[1].refUnique → clé param
+        "filter_annee_agg": "arko_default_67764c880046a",    # fieldName agg → chercher bucket
     },
     "36": {
         "base_url": "https://www.archives36.fr",
@@ -226,12 +229,41 @@ async def search_acte(
     if cfg.get("contenu_id"):
         params[f"{moteur_ref}--contenuIds[0]"] = cfg["contenu_id"]
 
-    if cfg.get("filter_commune") and commune:
-        fc = cfg["filter_commune"]
-        mode = cfg.get("filter_commune_mode") or "input"
-        params[f"{moteur_ref}--filtreGroupes[groupes][0][{fc}][q][0]"] = commune
+    fc = cfg.get("filter_commune")
+    mode = cfg.get("filter_commune_mode") or "input"
+    commune_value = commune  # valeur par défaut (mode input)
+
+    annee_value: str | None = None  # bucket année avec hash si dispo
+
+    if fc and commune and mode == "select":
+        # mode select : commune + éventuellement année nécessitent des hash
+        # → premier appel sans filtres pour récupérer les aggregations
+        agg_commune_key = cfg.get("filter_commune_agg") or fc
+        agg_annee_key = cfg.get("filter_annee_agg")
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp0 = await client.get(
+                f"{base_url}/_recherche-api/search/{moteur_id}", params=params
+            )
+            resp0.raise_for_status()
+            aggs0 = _get_aggregations(resp0.json())
+        bucket = _find_bucket_value(aggs0, agg_commune_key, commune)
+        if bucket:
+            commune_value = bucket
+        if agg_annee_key:
+            annee_value = _find_period_bucket(aggs0, agg_annee_key, annee_debut, annee_fin)
+
+    if fc and commune:
+        params[f"{moteur_ref}--filtreGroupes[groupes][0][{fc}][q][0]"] = commune_value
         params[f"{moteur_ref}--filtreGroupes[groupes][0][{fc}][op]"] = "AND"
         params[f"{moteur_ref}--filtreGroupes[groupes][0][{fc}][extras][mode]"] = mode
+
+    fa = cfg.get("filter_annee")
+    if fa and annee_value:
+        # filtre année côté serveur (select mode — valeur avec hash)
+        idx = 1 if fc else 0
+        params[f"{moteur_ref}--filtreGroupes[groupes][{idx}][{fa}][q][0]"] = annee_value
+        params[f"{moteur_ref}--filtreGroupes[groupes][{idx}][{fa}][op]"] = "AND"
+        params[f"{moteur_ref}--filtreGroupes[groupes][{idx}][{fa}][extras][mode]"] = "select"
 
     async with httpx.AsyncClient(timeout=15) as client:
         resp = await client.get(
@@ -242,11 +274,13 @@ async def search_acte(
 
     results = data.get("results", [])
 
-    # Filtrage local par année (le serveur ne filtre pas l'année)
-    matching = [
-        r for r in results
-        if _covers_year_range(r.get("intitule", ""), annee_debut, annee_fin)
-    ]
+    # Filtrage local par année (si pas de filtre serveur, ou pour affiner)
+    if not annee_value:
+        results = [
+            r for r in results
+            if _covers_year_range(r.get("intitule", ""), annee_debut, annee_fin)
+        ]
+    matching = results
 
     if not matching:
         return []
