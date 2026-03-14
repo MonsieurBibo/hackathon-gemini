@@ -2,7 +2,7 @@
 Service Gemini — wrapper autour de google-genai 1.x.
 
 Modèles utilisés :
-- OCR / vision      : gemini-3.1-flash-preview (~4 000 pages/$1, voir docs/project/models.md)
+- OCR / vision      : gemini-3-flash-preview
 - Raisonnement      : gemini-3.1-pro-preview (désambiguïsation, contexte 1M)
 - Embeddings        : gemini-embedding-2-preview (multimodal texte+image, 3072 dims)
 
@@ -36,7 +36,7 @@ async def ocr_image(
     if stream_callback:
         full = []
         async for chunk in client.aio.models.generate_content_stream(
-            model="gemini-3.1-flash-preview", contents=contents
+            model="gemini-3-flash-preview", contents=contents
         ):
             if chunk.text:
                 stream_callback(chunk.text)
@@ -44,7 +44,7 @@ async def ocr_image(
         return "".join(full)
     else:
         response = await client.aio.models.generate_content(
-            model="gemini-3.1-flash-preview", contents=contents
+            model="gemini-3-flash-preview", contents=contents
         )
         return response.text
 

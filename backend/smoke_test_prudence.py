@@ -78,8 +78,9 @@ async def main():
         fail("Réponse n'est pas un JPEG")
     ok(f"JPEG valide, {len(img):,} bytes")
 
-    # --- Étape 4 : OCR (si GEMINI_API_KEY disponible) ---
-    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    # --- Étape 4 : OCR (si clé API disponible) ---
+    from config import settings
+    api_key = settings.resolved_api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not api_key:
         print("\n4. OCR — skipped (GEMINI_API_KEY absent)")
     else:
