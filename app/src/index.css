@@ -587,6 +587,54 @@ body {
 @keyframes bar-grow { to { width: 40%; } }
 @keyframes fade-in-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
+/* ─── START SCREEN ─────────────────────────────────────────── */
+.start-screen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  overflow-y: auto;
+  padding: 40px 20px;
+}
+
+.start-box {
+  border: 2px solid var(--black);
+  background: var(--white);
+  padding: 40px;
+  max-width: 480px;
+  width: 100%;
+}
+
+.start-title {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 42px;
+  letter-spacing: -0.02em;
+  color: var(--black);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.start-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--mid);
+  line-height: 1.7;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--black);
+}
+
+.start-error {
+  margin-top: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--error);
+  border: 2px solid var(--error);
+  padding: 8px 10px;
+  background: #fff0f0;
+}
+
 /* ─── REACT-D3-TREE OVERRIDES ──────────────────────────────── */
 .rd3t-tree-container { width: 100%; height: 100%; }
 .rd3t-link { stroke: #c8c4bc !important; stroke-width: 2px !important; fill: none !important; }

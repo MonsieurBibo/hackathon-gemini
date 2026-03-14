@@ -6,22 +6,20 @@ import { AgentsPanel } from '@/components/AgentsPanel'
 import { TreeView } from '@/components/TreeView'
 import { IndividuCard } from '@/components/IndividuCard'
 import { Chatbox } from '@/components/Chatbox'
+import { StartScreen } from '@/components/StartScreen'
 import type { Individu } from '@/types'
-import { MOCK_ARBRE, MOCK_AGENTS, MOCK_OCR } from '@/mocks/data'
-
-const USE_MOCK = import.meta.env.DEV && import.meta.env.VITE_MOCK === 'true'
 
 export default function App() {
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [selectedIndividu, setSelectedIndividu] = useState<Individu | null>(null)
 
-  const sse = useSSE(USE_MOCK ? null : sessionId)
-  const arbre = USE_MOCK ? MOCK_ARBRE : sse.arbre
-  const agents = USE_MOCK ? MOCK_AGENTS : sse.agents
-  const ocrStream = USE_MOCK ? MOCK_OCR : sse.ocrStream
-  const question = USE_MOCK ? null : sse.question
-  const isRunning = USE_MOCK ? false : sse.isRunning
-  const error = USE_MOCK ? null : sse.error
+  const sse = useSSE(sessionId)
+  const arbre = sse.arbre
+  const agents = sse.agents
+  const ocrStream = sse.ocrStream
+  const question = sse.question
+  const isRunning = sse.isRunning
+  const error = sse.error
 
   const { treeData, individuList } = useArbre(arbre)
 
@@ -29,10 +27,20 @@ export default function App() {
   const deptLabel = arbre ? (Object.values(arbre.individus)[0]?.naissance.dept ?? '—') : '—'
   const activeCount = agents.filter(a => a.status !== 'done' && a.status !== 'error').length
 
+  const handleReset = () => {
+    setSessionId(null)
+    setSelectedIndividu(null)
+  }
+
   return (
     <div className="app-layout">
       <header className="header">
-        <div className="header-logo">
+        <div
+          className="header-logo"
+          onClick={handleReset}
+          style={{ cursor: 'pointer' }}
+          title="Back to start"
+        >
           <div className="header-logo-title">Genealogy<br />AI</div>
         </div>
         <div className="header-info">
@@ -66,23 +74,27 @@ export default function App() {
         )}
       </header>
 
-      <div className="app-body">
-        <SearchPanel
-          individuList={individuList}
-          selectedId={selectedIndividu?.id ?? null}
-          onSelect={setSelectedIndividu}
-          onSearch={setSessionId}
-          isRunning={isRunning}
-        />
+      {!sessionId ? (
+        <StartScreen onSearch={setSessionId} />
+      ) : (
+        <div className="app-body">
+          <SearchPanel
+            individuList={individuList}
+            selectedId={selectedIndividu?.id ?? null}
+            onSelect={setSelectedIndividu}
+            onSearch={setSessionId}
+            isRunning={isRunning}
+          />
 
-        <TreeView
-          treeData={treeData}
-          arbre={arbre}
-          onNodeClick={setSelectedIndividu}
-        />
+          <TreeView
+            treeData={treeData}
+            arbre={arbre}
+            onNodeClick={setSelectedIndividu}
+          />
 
-        <AgentsPanel agents={agents} ocrStream={ocrStream} />
-      </div>
+          <AgentsPanel agents={agents} ocrStream={ocrStream} />
+        </div>
+      )}
 
       {selectedIndividu && (
         <IndividuCard
