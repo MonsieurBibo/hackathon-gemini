@@ -82,14 +82,14 @@ body {
   font-size: 8px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #5a5a5a;
+  color: var(--lime);
   margin-bottom: 2px;
 }
 
 .header-cell-value {
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
-  color: var(--white);
+  color: #ffffff;
   letter-spacing: 0.03em;
 }
 
@@ -642,3 +642,52 @@ body {
 
 /* custom path class */
 .tree-edge-path { stroke: #c8c4bc; stroke-width: 1.5; fill: none; }
+
+/* ─── LIGHTBOX ─────────────────────────────────────────────── */
+.lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+.lightbox img { max-width: 90vw; max-height: 80vh; object-fit: contain; border: 2px solid var(--lime); }
+.lightbox-close { font-family: 'Archivo Black', sans-serif; font-size: 13px; letter-spacing: 0.1em; color: var(--lime); background: none; border: 2px solid var(--lime); padding: 6px 20px; cursor: pointer; text-transform: uppercase; }
+.lightbox-close:hover { background: var(--lime); color: var(--black); }
+.drawer-acte-view { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: var(--lime); background: none; border: 1px solid var(--lime); padding: 2px 8px; cursor: pointer; text-transform: uppercase; margin-left: auto; }
+.drawer-acte-view:hover { background: var(--lime); color: var(--black); }
+.drawer-media-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+.drawer-media-item { border: 1px solid var(--gray); padding: 8px; font-size: 9px; font-family: 'JetBrains Mono', monospace; color: var(--mid); text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; }
+.drawer-media-item:hover { border-color: var(--lime); color: var(--black); }
+
+/* ─── DOCUMENTS VIEWER ──────────────────────────────────────── */
+.docviewer { position: fixed; inset: 0; z-index: 150; background: var(--bg); display: flex; flex-direction: column; }
+.docviewer-head { background: var(--black); height: 52px; display: flex; align-items: center; padding: 0 24px; gap: 16px; flex-shrink: 0; }
+.docviewer-title { font-family: 'Archivo Black', sans-serif; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); flex: 1; }
+.docviewer-body { display: grid; grid-template-columns: 300px 1fr; flex: 1; overflow: hidden; min-height: 0; }
+.docviewer-list { border-right: 2px solid var(--black); overflow-y: auto; }
+.docviewer-item { padding: 14px 16px; border-bottom: 1px solid var(--gray); cursor: pointer; }
+.docviewer-item.active, .docviewer-item:hover { background: var(--lime); }
+.docviewer-item-type { font-family: 'Archivo Black', sans-serif; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+.docviewer-item-meta { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--mid); margin-top: 3px; }
+.docviewer-preview { overflow: auto; display: flex; align-items: flex-start; justify-content: center; padding: 32px; background: #e8e4db; }
+.docviewer-preview img { max-width: 100%; max-height: calc(100vh - 180px); object-fit: contain; box-shadow: 4px 4px 0 var(--black); border: 2px solid var(--black); }
+.docviewer-transcription { font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8; color: var(--black); max-width: 680px; white-space: pre-wrap; }
+
+/* ─── ADMIN REQUEST ─────────────────────────────────────────── */
+.admin-banner { background: var(--partial); color: var(--black); padding: 10px 14px; font-family: 'Archivo Black', sans-serif; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+.admin-letter { width: 100%; background: var(--white); border: 1px solid var(--gray); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; line-height: 1.7; color: var(--black); padding: 12px; resize: none; outline: none; }
+.admin-btn { font-family: 'Archivo Black', sans-serif; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 16px; cursor: pointer; border: 2px solid var(--black); background: var(--black); color: var(--lime); }
+.admin-btn:hover { background: var(--lime); color: var(--black); }
+.admin-btn-outline { background: transparent; color: var(--black); margin-left: 8px; }
+.admin-btn-outline:hover { background: var(--black); color: var(--lime); }
+
+/* ─── SEMANTIC SEARCH ───────────────────────────────────────── */
+.search-mode-toggle { display: flex; border-bottom: 2px solid var(--black); }
+.search-mode-btn { flex: 1; padding: 8px 0; font-family: 'Archivo Black', sans-serif; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; border: none; cursor: pointer; background: transparent; color: var(--mid); border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.search-mode-btn.active { background: var(--lime); color: var(--black); border-bottom-color: var(--lime); }
+.semantic-textarea { width: 100%; resize: none; background: var(--white); border: 1px solid var(--gray); border-radius: 0; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--black); padding: 10px; outline: none; }
+.semantic-textarea:focus { border-color: var(--black); }
+
+/* ─── NODE PULSE ────────────────────────────────────────────── */
+@keyframes node-pulse { 0%, 100% { stroke-opacity: 1; stroke-width: 2; } 50% { stroke-opacity: 0.4; stroke-width: 4; } }
+.node-questioned { animation: node-pulse 1.5s ease-in-out infinite; }
+
+/* ─── CHATBOX ───────────────────────────────────────────────── */
+@keyframes chatbox-appear { 0% { transform: translateX(-50%) translateY(20px) scale(0.95); opacity: 0; } 60% { transform: translateX(-50%) translateY(-4px) scale(1.01); } 100% { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; } }
+.chatbox-minimize { background: none; border: 1px solid #444; color: #aaa; font-family: 'JetBrains Mono', monospace; font-size: 12px; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.chatbox-minimize:hover { border-color: var(--lime); color: var(--lime); }

@@ -35,9 +35,10 @@ async def ocr_image(
     ]
     if stream_callback:
         full = []
-        async for chunk in client.aio.models.generate_content_stream(
+        stream = await client.aio.models.generate_content_stream(
             model="gemini-3-flash-preview", contents=contents
-        ):
+        )
+        async for chunk in stream:
             if chunk.text:
                 stream_callback(chunk.text)
                 full.append(chunk.text)

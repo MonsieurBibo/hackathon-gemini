@@ -8,19 +8,21 @@ export interface TreeNode {
   individu: Individu
 }
 
-function buildNode(id: string, individus: Record<string, Individu>): TreeNode | null {
+function buildNode(id: string, individus: Record<string, Individu>, visited: Set<string> = new Set()): TreeNode | null {
+  if (visited.has(id)) return null
   const ind = individus[id]
   if (!ind) return null
+  visited.add(id)
 
   const children: TreeNode[] = []
 
   if (ind.pere_id) {
-    const node = buildNode(ind.pere_id, individus)
+    const node = buildNode(ind.pere_id, individus, visited)
     if (node) children.push(node)
   }
 
   if (ind.mere_id) {
-    const node = buildNode(ind.mere_id, individus)
+    const node = buildNode(ind.mere_id, individus, visited)
     if (node) children.push(node)
   }
 

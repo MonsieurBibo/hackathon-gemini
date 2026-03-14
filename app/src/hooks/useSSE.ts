@@ -108,7 +108,14 @@ export function useSSE(sessionId: string | null): SSEState {
               ...prev,
               arbre: prev.arbre
                 ? { ...prev.arbre, individus: { ...prev.arbre.individus, [individu.id]: individu } }
-                : null,
+                : {
+                    session_id: sessionId!,
+                    root_id: individu.id,
+                    individus: { [individu.id]: individu },
+                    generation_max: 3,
+                    generation_courante: individu.generation,
+                    statut: 'en_cours' as const,
+                  },
             }))
             break
           }

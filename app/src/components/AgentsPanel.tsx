@@ -42,6 +42,17 @@ const PROG_WIDTH: Record<AgentState['status'], string> = {
   error: '100%',
 }
 
+function extractReadableOcr(raw: string): string {
+  // Essaie d'extraire le contenu de "transcription" depuis le JSON accumulé
+  const match = raw.match(/"transcription"\s*:\s*"([\s\S]*?)(?:"|,\s*"[a-z_]+"\s*:)/)
+  if (match) return match[1].replace(/\\n/g, '\n').replace(/\\"/g, '"')
+  // Filtre les lignes qui ressemblent à du JSON
+  const lines = raw.split('\n').filter(l => !l.trim().match(/^[{}\[\]"`]|"found"|"confiance"|```/))
+  const readable = lines.join('\n').trim()
+  if (readable.length > 20) return readable
+  return '' // rien de lisible encore
+}
+
 export function AgentsPanel({ agents, ocrStream }: Props) {
   const ocrRef = useRef<HTMLDivElement>(null)
   const activeAgent = agents.find(a => a.status === 'ocr') ?? agents.find(a => a.status !== 'done' && a.status !== 'error')
@@ -94,11 +105,12 @@ export function AgentsPanel({ agents, ocrStream }: Props) {
           )}
         </div>
         <div className="ocr-body" ref={ocrRef}>
-          {ocrStream
-            ? ocrStream
-            : <span style={{ color: 'var(--gray)' }}>Waiting for OCR…</span>
-          }
-          {ocrStream && <span className="ocr-cursor" />}
+          {(() => {
+            const readableOcr = extractReadableOcr(ocrStream)
+            if (readableOcr) return <>{readableOcr}<span className="ocr-cursor" /></>
+            if (ocrStream.length > 0) return <><span style={{ color: 'var(--gray)' }}>Scanning pages…</span><span className="ocr-cursor" /></>
+            return <span style={{ color: 'var(--gray)' }}>Waiting for OCR…</span>
+          })()}
         </div>
       </div>
     </div>

@@ -1,60 +1,54 @@
-# GenealogyAI — Hackathon Gemini Paris 2026
+# Lignée — Hackathon Gemini Paris 2026
 
-Agent autonome de généalogie française : entre un nom d'ancêtre, remonte l'arbre génération par génération en naviguant seul les archives départementales, lisant les actes manuscrits avec Gemini Vision, et construisant une base de connaissance sémantique.
+**Autonomous genealogy agent for French archives.** Enter an ancestor's name → the agent navigates departmental archives (Arkotheque), reads handwritten 19th-century records with Gemini 2.5 Pro, extracts parents, and climbs the family tree generation by generation.
 
-**Stack** : FastAPI · React/Vite · Gemini 2.5 Pro · gemini-embedding-2-preview · ChromaDB · Arkotheque HTTP API
+No tool does this today: navigate → OCR raw scans → extract → recurse.
 
 ---
 
-## Lancer le projet
+## Requirements
+
+- Python 3.11+, `uv`
+- Node 18+
+- `GEMINI_API_KEY` in `backend/.env`
+
+---
+
+## Run
 
 ```bash
 # Backend
-cd backend && pip install -r requirements.txt
-cp .env.example .env  # ajouter GEMINI_API_KEY
-uvicorn main:app --reload
+cd backend
+uv sync
+cp .env.example .env   # add GEMINI_API_KEY
+uv run uvicorn main:app --reload
 
 # Frontend
-cd frontend && npm install
-npm run dev
+cd app
+npm install
+npm run dev            # → http://localhost:5173
 ```
 
 ---
 
-## Documentation
+## Demo
 
-### Projet
-| Fichier | Contenu |
-|---------|---------|
-| `docs/project/architecture.md` | Pipeline complet, stack, demo path, risques |
-| `docs/project/competitive.md` | Analyse concurrentielle (généalogie + GS e-commerce) |
-| `docs/project/models.md` | Modèles Gemini disponibles et recommandations |
-| `docs/project/genealogy-apis.md` | Research sur les APIs généalogiques existantes (FamilySearch, Geneanet, BnF…) |
+1. Enter **Prudence Aimée Pinçon · Neuilly-en-Sancerre · 1843 · 2 generations**
+2. Watch agents navigate archives and OCR manuscripts live
+3. The family tree builds in real time — click any node to see the original document
+4. If an ancestor was born after 1900 (restricted records), the app generates the mairie request letter automatically
 
-### Arkotheque (archives départementales françaises)
-| Fichier | Contenu |
-|---------|---------|
-| `docs/arkotheque/overview.md` | Vue d'ensemble, 2 versions, tableau des depts testés |
-| `docs/arkotheque/api-old.md` | Endpoints + format filtres version ancienne (majoritaire) |
-| `docs/arkotheque/api-new.md` | Endpoints version nouvelle (Jura-style) |
-| `docs/arkotheque/departments.md` | IDs précis par département (Cher, Ardennes, Indre, M&M, Jura) |
-
-### Tâches de développement
-| Fichier | Contenu |
-|---------|---------|
-| `docs/tasks/contracts.md` | Contrats de données : JSON, SSE events, endpoints REST |
-| `docs/tasks/backend.md` | Tâches B0–B8 avec signatures de fonctions |
-| `docs/tasks/frontend.md` | Tâches F0–F6 avec types TypeScript |
-| `docs/tasks/roadmap.md` | Phases de développement + critères de done |
-
-### Découvertes
-| Fichier | Contenu |
-|---------|---------|
-| `DISCOVERIES.md` | Résumé des découvertes critiques (API, POC validé) |
+**POC validated:** birth record of Prudence Aimée Pinçon found at archives18.fr, father Jean Pinçon extracted, recursive agent tested on 2 generations.
 
 ---
 
-## POC validé
+## Stack
 
-Acte de naissance de **Prudence Aimée PINÇON**, 3 mars 1843, Neuilly-en-Sancerre (Cher).
-Père extrait : Jean Pinçon (laboureur). Pipeline Arkotheque → Gemini OCR fonctionnel.
+| Layer | Tech |
+|-------|------|
+| Agent / OCR | Gemini 2.5 Pro (1M token context) |
+| Embeddings | gemini-embedding-2-preview (multimodal) |
+| Archives | Arkotheque HTTP API (~80 French departments) |
+| Backend | FastAPI + SSE |
+| Frontend | React + Vite + react-d3-tree |
+| Vector DB | ChromaDB in-memory |

@@ -5,8 +5,8 @@ import { SearchPanel } from '@/components/SearchPanel'
 import { AgentsPanel } from '@/components/AgentsPanel'
 import { TreeView } from '@/components/TreeView'
 import { IndividuCard } from '@/components/IndividuCard'
-import { Chatbox } from '@/components/Chatbox'
 import { StartScreen } from '@/components/StartScreen'
+import { answerQuestion } from '@/api/client'
 import type { Individu } from '@/types'
 
 export default function App() {
@@ -84,12 +84,17 @@ export default function App() {
             onSelect={setSelectedIndividu}
             onSearch={setSessionId}
             isRunning={isRunning}
+            sessionId={sessionId}
           />
 
           <TreeView
             treeData={treeData}
             arbre={arbre}
             onNodeClick={setSelectedIndividu}
+            onSearchParents={(individu) => console.log('Search parents for:', individu.nom, individu.prenom)}
+            questionedIndividuId={question?.individu_id ?? null}
+            question={question}
+            onAnswer={(agentId, individuId, choix) => answerQuestion(sessionId ?? '', agentId, individuId, choix)}
           />
 
           <AgentsPanel agents={agents} ocrStream={ocrStream} />
@@ -105,9 +110,7 @@ export default function App() {
         />
       )}
 
-      {question && sessionId && (
-        <Chatbox question={question} sessionId={sessionId} />
-      )}
+
     </div>
   )
 }

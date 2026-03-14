@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { SearchFormData } from '@/types'
+import type { Individu, SearchFormData } from '@/types'
 
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
@@ -20,3 +20,8 @@ export const answerQuestion = async (
 }
 
 export const getStreamUrl = (sessionId: string) => `${BASE}/stream/${sessionId}`
+
+export async function semanticSearch(sessionId: string, query: string): Promise<Individu[]> {
+  const resp = await api.get<Individu[]>('/similar', { params: { session_id: sessionId, q: query } })
+  return resp.data
+}

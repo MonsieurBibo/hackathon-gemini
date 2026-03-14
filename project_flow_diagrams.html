@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualisation du Projet Hackathon Gemini</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'forest' });
+    </script>
+    <style>
+        body { font-family: sans-serif; margin: 2em; background: #f4f4f9; }
+        section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .mermaid { display: flex; justify-content: center; }
+    </style>
+</head>
+<body>
+    <h1>Vision Globale du Projet</h1>
+
+    <section>
+        <h2>1. Pipeline Global de Recherche</h2>
+        <div class="mermaid">
+            graph TD
+                User([Utilisateur]) -->|Nom + Commune + Année| UI[Interface React/D3]
+                UI -->|Requête| API[FastAPI Backend]
+                
+                subgraph "Processus Itératif (Agents)"
+                    API -->|1. Découverte| Arko[API Arkotheque]
+                    Arko -->|ID Registre| Img[Récupération JPEG]
+                    Img -->|Vision| Gemini[Gemini 3.1 Flash]
+                    Gemini -->|JSON Structuré| Extraction{Extraction réussie ?}
+                    Extraction -- Oui --> Store[(ChromaDB + JSON)]
+                    Extraction -- Oui --> Loop[Calcul Parents + Année-25]
+                    Loop -->|Récursivité| Arko
+                end
+                
+                Store -->|Live Update| UI
+                UI -->|Visualisation| D3[Arbre D3 Animé]
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Flux de l'Agent Récursif</h2>
+        <div class="mermaid">
+            sequenceDiagram
+                participant A as Admin Agent (Gemini 3.1 Pro)
+                participant R as Recursive Agent (Gemini 3.1 Flash)
+                participant O as OCR Agent (Gemini 3.1 Flash)
+                participant DB as Vector Store
+
+                A->>R: Initialiser recherche (Individu 0)
+                Note over R: Génération N
+                R->>O: Extraire données image (Gemini 3.1 Flash)
+                O-->>R: JSON (Père, Mère, Acte)
+                R->>DB: Stocker métadonnées + Embeddings (Gemini Embedding 2)
+                
+                loop Pour chaque parent identifié
+                    Note over R: Génération N+1
+                    R->>R: Estimer année naissance (-25/30 ans)
+                    R->>A: Nouvelle tâche de recherche
+                    A->>R: Exécuter recherche parent
+                end
+                
+                R-->>A: Arbre complété
+        </div>
+    </section>
+
+    <section>
+        <h2>3. Architecture Technique (Stack)</h2>
+        <div class="mermaid">
+            flowchart LR
+                subgraph "Sources"
+                    Ark[Archives Départementales]
+                end
+
+                subgraph "Intelligence"
+                    G_Vision[Gemini 3.1 Flash]
+                    G_Embed[Gemini Embedding 2 Preview]
+                end
+
+                subgraph "Persistence"
+                    Chroma[(ChromaDB In-Memory)]
+                    JSON[/Fichiers JSON Individus/]
+                end
+
+                Ark -->|Images Jpeg| G_Vision
+                G_Vision -->|Texte Extrait| G_Embed
+                G_Vision -->|Data| JSON
+                G_Embed -->|Vecteurs| Chroma
+                JSON -.->|RAG| G_Chat[Chatbot Sémantique]
+                Chroma -.->|Recherche| G_Chat
+        </div>
+    </section>
+</body>
+</html>

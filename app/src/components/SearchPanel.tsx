@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Individu, SearchFormData } from '@/types'
-import { startSearch } from '@/api/client'
+import { startSearch, semanticSearch } from '@/api/client'
 
 interface Props {
   individuList: Individu[]
@@ -8,6 +8,7 @@ interface Props {
   onSelect: (ind: Individu) => void
   onSearch: (sessionId: string) => void
   isRunning: boolean
+  sessionId: string | null
 }
 
 const STATUS_LABEL: Record<Individu['statut'], string> = {
@@ -34,7 +35,7 @@ const FILL_WIDTH: Record<Individu['statut'], string> = {
   inconnu: '20%',
 }
 
-export function SearchPanel({ individuList, selectedId, onSelect, onSearch, isRunning }: Props) {
+export function SearchPanel({ individuList, selectedId, onSelect, onSearch, isRunning, sessionId }: Props) {
   const [form, setForm] = useState<SearchFormData>({
     nom: '',
     prenom: '',
@@ -43,6 +44,10 @@ export function SearchPanel({ individuList, selectedId, onSelect, onSearch, isRu
     generations: 2,
   })
   const [loading, setLoading] = useState(false)
+  const [mode, setMode] = useState<'new' | 'similar'>('new')
+  const [semanticQuery, setSemanticQuery] = useState('')
+  const [semanticResults, setSemanticResults] = useState<Individu[]>([])
+  const [semanticLoading, setSemanticLoading] = useState(false)
 
   const handleSubmit = async () => {
     if (loading || isRunning) return
@@ -57,12 +62,73 @@ export function SearchPanel({ individuList, selectedId, onSelect, onSearch, isRu
     }
   }
 
+  const handleSemanticSearch = async () => {
+    if (!sessionId) {
+      console.log('No sessionId — cannot run semantic search')
+      return
+    }
+    setSemanticLoading(true)
+    try {
+      const results = await semanticSearch(sessionId, semanticQuery)
+      setSemanticResults(results)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setSemanticLoading(false)
+    }
+  }
+
   return (
     <div className="panel panel-left">
       <div className="panel-head">
         <span className="panel-head-title">Search</span>
       </div>
 
+      <div className="search-mode-toggle">
+        <button
+          className={`search-mode-btn${mode === 'new' ? ' active' : ''}`}
+          onClick={() => setMode('new')}
+        >NEW SEARCH</button>
+        <button
+          className={`search-mode-btn${mode === 'similar' ? ' active' : ''}`}
+          onClick={() => setMode('similar')}
+        >FIND SIMILAR</button>
+      </div>
+
+      {mode === 'similar' ? (
+        <div style={{ padding: '12px' }}>
+          <textarea
+            className="semantic-textarea"
+            rows={3}
+            placeholder="Describe the ancestor… (e.g. farmer from Cher, born around 1810)"
+            value={semanticQuery}
+            onChange={e => setSemanticQuery(e.target.value)}
+          />
+          <button
+            className="search-btn submit-btn"
+            style={{ marginTop: '8px', width: '100%' }}
+            onClick={handleSemanticSearch}
+            disabled={semanticLoading}
+          >
+            {semanticLoading ? 'SEARCHING…' : '[SEARCH]'}
+          </button>
+          {semanticResults.length > 0 && (
+            <div style={{ marginTop: '12px' }}>
+              {semanticResults.map(ind => (
+                <div
+                  key={ind.id}
+                  className="individu-item anc-card"
+                  onClick={() => onSelect(ind)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '11px', padding: '6px 10px 2px' }}>{ind.prenom} {ind.nom}</div>
+                  <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '9px', color: 'var(--mid)', padding: '0 10px 8px' }}>{ind.naissance.date?.slice(0, 4) ?? '?'} · {ind.naissance.commune}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
       <div className="panel-body">
         <div className="field">
           <label className="field-label">Family name</label>
@@ -165,6 +231,7 @@ export function SearchPanel({ individuList, selectedId, onSelect, onSearch, isRu
           </>
         )}
       </div>
+      )}
     </div>
   )
 }

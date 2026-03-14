@@ -36,7 +36,7 @@ export interface Individu {
   actes: Acte[]
   media: Media[]
   embedding_id: string | null
-  statut: 'complet' | 'partiel' | 'inconnu'
+  statut: 'complet' | 'partiel' | 'inconnu' | 'post_1900'
 }
 
 export interface Arbre {

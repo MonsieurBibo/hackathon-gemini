@@ -1,4 +1,7 @@
+import { useState } from 'react'
 import type { Individu, Arbre } from '@/types'
+import { AdminRequest } from './AdminRequest'
+import { DocumentsViewer } from './DocumentsViewer'
 
 interface Props {
   individu: Individu
@@ -8,8 +11,15 @@ interface Props {
 }
 
 export function IndividuCard({ individu, arbre, onClose, onNavigate }: Props) {
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
+  const [showDocuments, setShowDocuments] = useState(false)
+
   const pere = individu.pere_id ? arbre?.individus[individu.pere_id] : null
   const mere = individu.mere_id ? arbre?.individus[individu.mere_id] : null
+
+  const isPost1900 = individu.statut === 'post_1900' || (!!individu.naissance.date && parseInt(individu.naissance.date.slice(0, 4)) > 1900)
+
+  const enfants = arbre ? Object.values(arbre.individus).filter(i => i.pere_id === individu.id || i.mere_id === individu.id) : []
 
   const formatDate = (d: string | null, approx: boolean) => {
     if (!d) return '?'
@@ -21,6 +31,12 @@ export function IndividuCard({ individu, arbre, onClose, onNavigate }: Props) {
     return `${parseInt(day)} ${months[parseInt(m) - 1]} ${year}`
   }
 
+  const hasDocuments = individu.actes.length > 0 || individu.media.length > 0
+
+  if (showDocuments) {
+    return <DocumentsViewer individu={individu} onClose={() => setShowDocuments(false)} />
+  }
+
   return (
     <>
       <div className="drawer-overlay" onClick={onClose} />
@@ -29,10 +45,31 @@ export function IndividuCard({ individu, arbre, onClose, onNavigate }: Props) {
           <div>
             <div className="drawer-title">{individu.prenom}<br />{individu.nom}</div>
           </div>
+          {hasDocuments && (
+            <button
+              style={{
+                background: 'none',
+                border: '2px solid var(--lime)',
+                color: 'var(--lime)',
+                fontFamily: "'Archivo Black', sans-serif",
+                fontSize: '9px',
+                padding: '4px 10px',
+                cursor: 'pointer',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+              }}
+              onClick={() => setShowDocuments(true)}
+            >
+              VIEW ALL DOCS
+            </button>
+          )}
           <button className="drawer-close" onClick={onClose}>✕</button>
         </div>
 
         <div className="drawer-body">
+          {/* Post-1900 admin request */}
+          {isPost1900 && <AdminRequest individu={individu} />}
+
           {/* Identity */}
           <div className="drawer-section">
             <div className="drawer-section-label">Identity</div>
@@ -61,6 +98,7 @@ export function IndividuCard({ individu, arbre, onClose, onNavigate }: Props) {
               <span className="drawer-field-val" style={{
                 color: individu.statut === 'complet' ? 'var(--complete)'
                   : individu.statut === 'partiel' ? 'var(--partial)'
+                  : individu.statut === 'post_1900' ? '#2060c0'
                   : 'var(--mid)'
               }}>
                 {individu.statut.toUpperCase()}
@@ -99,6 +137,19 @@ export function IndividuCard({ individu, arbre, onClose, onNavigate }: Props) {
             </div>
           )}
 
+          {/* Children */}
+          {enfants.length > 0 && (
+            <div className="drawer-section">
+              <div className="drawer-section-label">Children</div>
+              {enfants.map(enfant => (
+                <div key={enfant.id} className="drawer-field" style={{ cursor: 'pointer' }} onClick={() => onNavigate(enfant)}>
+                  <span className="drawer-field-key">{enfant.sexe === 'M' ? 'Son' : enfant.sexe === 'F' ? 'Daughter' : 'Child'}</span>
+                  <span className="drawer-field-val" style={{ textDecoration: 'underline', textDecorationStyle: 'dotted' }}>{enfant.prenom} {enfant.nom}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Actes */}
           {individu.actes.length > 0 && (
             <div className="drawer-section">
@@ -108,6 +159,9 @@ export function IndividuCard({ individu, arbre, onClose, onNavigate }: Props) {
                   <div className="drawer-acte-head">
                     <span className="drawer-acte-type">{acte.type}</span>
                     <span className="drawer-acte-conf">{Math.round(acte.confiance * 100)}% conf.</span>
+                    {acte.url_image && (
+                      <button className="drawer-acte-view" onClick={() => setLightboxUrl(acte.url_image)}>VIEW DOC</button>
+                    )}
                   </div>
                   {acte.transcription && (
                     <div className="drawer-acte-body">{acte.transcription}</div>
@@ -118,6 +172,13 @@ export function IndividuCard({ individu, arbre, onClose, onNavigate }: Props) {
           )}
         </div>
       </div>
+
+      {lightboxUrl && (
+        <div className="lightbox" onClick={() => setLightboxUrl(null)}>
+          <img src={lightboxUrl} alt="Archive document" onClick={e => e.stopPropagation()} />
+          <button className="lightbox-close" onClick={() => setLightboxUrl(null)}>CLOSE ✕</button>
+        </div>
+      )}
     </>
   )
 }
