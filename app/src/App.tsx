@@ -7,12 +7,22 @@ import { TreeView } from '@/components/TreeView'
 import { IndividuCard } from '@/components/IndividuCard'
 import { Chatbox } from '@/components/Chatbox'
 import type { Individu } from '@/types'
+import { MOCK_ARBRE, MOCK_AGENTS, MOCK_OCR } from '@/mocks/data'
+
+const USE_MOCK = import.meta.env.DEV && import.meta.env.VITE_MOCK === 'true'
 
 export default function App() {
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [selectedIndividu, setSelectedIndividu] = useState<Individu | null>(null)
 
-  const { arbre, agents, ocrStream, question, isRunning, error } = useSSE(sessionId)
+  const sse = useSSE(USE_MOCK ? null : sessionId)
+  const arbre = USE_MOCK ? MOCK_ARBRE : sse.arbre
+  const agents = USE_MOCK ? MOCK_AGENTS : sse.agents
+  const ocrStream = USE_MOCK ? MOCK_OCR : sse.ocrStream
+  const question = USE_MOCK ? null : sse.question
+  const isRunning = USE_MOCK ? false : sse.isRunning
+  const error = USE_MOCK ? null : sse.error
+
   const { treeData, individuList } = useArbre(arbre)
 
   const genLabel = arbre ? `GEN ${arbre.generation_courante}/${arbre.generation_max}` : '—'
