@@ -1,3 +1,13 @@
+"""
+Service Gemini — wrapper autour de google-genai 1.x.
+
+Modèles utilisés :
+- OCR / génération : gemini-2.5-pro
+- Embeddings       : gemini-embedding-2-preview (multimodal texte+image, 3072 dims)
+
+Ref tâche : B3 (docs/tasks/backend.md)
+Ref modèles : docs/project/models.md
+"""
 from google import genai
 from google.genai import types
 from config import settings

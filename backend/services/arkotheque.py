@@ -1,6 +1,18 @@
 """
 Client Arkotheque — version ancienne (routing.json présent).
 Couvre : Cher (18), Ardennes (08), Indre (36), Meurthe-et-Moselle (54).
+
+Ref tâche    : B1 (docs/tasks/backend.md)
+Ref API      : docs/arkotheque/api-old.md
+Ref IDs      : docs/arkotheque/departments.md
+Ref contrats : docs/tasks/contracts.md
+
+Points critiques :
+- Les filtres DOIVENT inclure [op]=AND et [extras][mode]=select (cf. api-old.md)
+- Les valeurs de filtres commune/date incluent un hash : "Neuilly[[arko_fiche_xyz]]"
+- Les valeurs exactes se découvrent via les aggregations d'une requête sans filtre
+- Sur certains moteurs "browse", le filtrage est côté client (Indre moteur 36)
+  → il faut paginer et filtrer localement (non implémenté ici, géré dans B5)
 """
 from __future__ import annotations
 import httpx

@@ -1,3 +1,10 @@
+"""
+Geocoding INSEE — détection du département depuis le nom de commune.
+
+API : https://geo.api.gouv.fr (gratuite, pas d'auth)
+Utilisé par : B1 (search_acte), B5 (communes limitrophes pour fallback)
+Ref tâche : B1 + B5 (docs/tasks/backend.md)
+"""
 import httpx
 
 GEO_API = "https://geo.api.gouv.fr/communes"
