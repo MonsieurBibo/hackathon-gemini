@@ -70,29 +70,34 @@ export function useSSE(sessionId: string | null): SSEState {
         const data = JSON.parse(raw) as SSEEvent & { type: string }
 
         switch (eventType) {
-          case 'thinking':
-            updateAgent(data.agent_id, data.individu_id, {
+          case 'thinking': {
+            const e = data as Extract<SSEEvent, { type: 'thinking' }>
+            updateAgent(e.agent_id, e.individu_id, {
               status: 'thinking',
-              last_message: (data as Extract<SSEEvent, { type: 'thinking' }>).message,
+              last_message: e.message,
               progress: AGENT_PROGRESS.thinking,
             })
             break
+          }
 
-          case 'step':
-            updateAgent(data.agent_id, data.individu_id, {
+          case 'step': {
+            const e = data as Extract<SSEEvent, { type: 'step' }>
+            updateAgent(e.agent_id, e.individu_id, {
               status: 'searching',
-              last_message: (data as Extract<SSEEvent, { type: 'step' }>).message,
+              last_message: e.message,
               progress: AGENT_PROGRESS.searching,
             })
             break
+          }
 
           case 'ocr_chunk': {
-            const chunk = (data as Extract<SSEEvent, { type: 'ocr_chunk' }>).chunk
-            updateAgent(data.agent_id, data.individu_id, {
+            const e = data as Extract<SSEEvent, { type: 'ocr_chunk' }>
+            updateAgent(e.agent_id, e.individu_id, {
               status: 'ocr',
               last_message: 'Reading document…',
               progress: AGENT_PROGRESS.ocr,
             })
+            const chunk = e.chunk
             setState(prev => ({ ...prev, ocrStream: prev.ocrStream + chunk }))
             break
           }
@@ -127,7 +132,7 @@ export function useSSE(sessionId: string | null): SSEState {
 
           case 'fallback': {
             const f = data as Extract<SSEEvent, { type: 'fallback' }>
-            updateAgent(data.agent_id, data.individu_id, {
+            updateAgent(f.agent_id, f.individu_id, {
               status: 'searching',
               last_message: `Fallback #${f.tentative}: ${f.action}`,
               tentative: f.tentative,
@@ -139,13 +144,15 @@ export function useSSE(sessionId: string | null): SSEState {
             setState(prev => ({ ...prev, question: data as Extract<SSEEvent, { type: 'question' }> }))
             break
 
-          case 'error':
-            updateAgent(data.agent_id, data.individu_id, {
+          case 'error': {
+            const e = data as Extract<SSEEvent, { type: 'error' }>
+            updateAgent(e.agent_id, e.individu_id, {
               status: 'error',
-              last_message: (data as Extract<SSEEvent, { type: 'error' }>).message,
+              last_message: e.message,
               progress: 100,
             })
             break
+          }
 
           case 'done': {
             const arbre = (data as Extract<SSEEvent, { type: 'done' }>).arbre
