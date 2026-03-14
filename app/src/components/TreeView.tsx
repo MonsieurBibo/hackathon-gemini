@@ -50,30 +50,37 @@ function CustomNode({ nodeDatum, rootId, onNodeClick }: {
         strokeWidth={strokeWidth}
         strokeDasharray={statut === 'inconnu' ? '8 4' : undefined}
       />
-      <text y={-8} textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={11} fill={textColor}>
+      <text y={-8} textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={11} fill={textColor} stroke="none">
         {givenName}
       </text>
-      <text y={7} textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={11} fill={textColor}>
+      <text y={7} textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={11} fill={textColor} stroke="none">
         {surname}
       </text>
-      <text y={22} textAnchor="middle" fontFamily="'JetBrains Mono', monospace" fontSize={9} fill={isRoot ? '#5a5a5a' : '#6a6860'}>
+      <text y={22} textAnchor="middle" fontFamily="'JetBrains Mono', monospace" fontSize={9} fill={isRoot ? '#9a9890' : '#6a6860'} stroke="none">
         {statut === 'inconnu' ? 'searching…' : `b. ${year}`}
       </text>
     </g>
   )
 }
 
+const ZOOM_STEP = 0.15
+const ZOOM_DEFAULT = 0.85
+
 export function TreeView({ treeData, arbre, onNodeClick }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [translate, setTranslate] = useState({ x: 600, y: 300 })
+  const [translate, setTranslate] = useState({ x: 150, y: 300 })
+  const [zoom, setZoom] = useState(ZOOM_DEFAULT)
   const genNum = arbre?.generation_courante ?? 1
 
-  useEffect(() => {
+  const fitTree = () => {
     if (!containerRef.current) return
     const { width, height } = containerRef.current.getBoundingClientRect()
-    // root on right side, ancestors expand to the left
-    setTranslate({ x: width * 0.62, y: height * 0.5 })
-  }, [treeData])
+    // root on left, ancestors expand to the right
+    setTranslate({ x: width * 0.18, y: height * 0.5 })
+    setZoom(ZOOM_DEFAULT)
+  }
+
+  useEffect(() => { fitTree() }, [treeData])
 
   return (
     <div className="center-panel">
@@ -96,7 +103,7 @@ export function TreeView({ treeData, arbre, onNodeClick }: Props) {
               })
             }
             pathClassFunc={() => 'tree-edge-path'}
-            zoom={0.85}
+            zoom={zoom}
             scaleExtent={{ min: 0.25, max: 2 }}
             enableLegacyTransitions
             transitionDuration={300}
@@ -120,9 +127,9 @@ export function TreeView({ treeData, arbre, onNodeClick }: Props) {
       </div>
 
       <div className="zoom-controls">
-        <button className="zoom-btn">+</button>
-        <button className="zoom-btn">−</button>
-        <button className="zoom-btn" style={{ fontSize: '14px' }}>⤢</button>
+        <button className="zoom-btn" onClick={() => setZoom(z => Math.min(2, z + ZOOM_STEP))}>+</button>
+        <button className="zoom-btn" onClick={() => setZoom(z => Math.max(0.25, z - ZOOM_STEP))}>−</button>
+        <button className="zoom-btn" style={{ fontSize: '14px' }} onClick={fitTree}>⤢</button>
       </div>
     </div>
   )

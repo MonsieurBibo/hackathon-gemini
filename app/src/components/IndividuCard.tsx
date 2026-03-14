@@ -13,7 +13,12 @@ export function IndividuCard({ individu, arbre, onClose, onNavigate }: Props) {
 
   const formatDate = (d: string | null, approx: boolean) => {
     if (!d) return '?'
-    return `${approx ? 'ca. ' : ''}${d}`
+    const year = d.slice(0, 4)
+    if (approx) return `ca. ${year}`
+    // Format YYYY-MM-DD → DD Mon YYYY
+    const [, m, day] = d.split('-')
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    return `${parseInt(day)} ${months[parseInt(m) - 1]} ${year}`
   }
 
   return (
