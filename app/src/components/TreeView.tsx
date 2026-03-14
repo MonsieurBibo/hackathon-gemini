@@ -15,6 +15,9 @@ const STATUT_STROKE: Record<string, string> = {
   inconnu: '#c8c4bc',
 }
 
+const W = 160
+const H = 56
+
 function CustomNode({ nodeDatum, rootId, onNodeClick }: {
   nodeDatum: { name: string; attributes?: Record<string, string>; individu?: Individu }
   rootId: string | null
@@ -23,30 +26,37 @@ function CustomNode({ nodeDatum, rootId, onNodeClick }: {
   const ind = nodeDatum.individu
   const statut = ind?.statut ?? 'inconnu'
   const isRoot = !!ind && ind.id === rootId
-  const stroke = STATUT_STROKE[statut]
+  const stroke = isRoot ? '#c8f000' : STATUT_STROKE[statut]
+  const strokeWidth = isRoot ? 2 : statut === 'inconnu' ? 1 : 2
   const fill = isRoot ? '#0a0a0a' : '#f8f6f0'
   const textColor = isRoot ? '#c8f000' : '#0a0a0a'
   const year = nodeDatum.attributes?.year ?? '?'
 
+  // Split name: last word = surname, rest = given name
+  const parts = nodeDatum.name.split(' ')
+  const surname = parts.pop() ?? ''
+  const givenName = parts.join(' ')
+
   return (
     <g onClick={() => ind && onNodeClick(ind)} style={{ cursor: 'pointer' }}>
+      {/* Lime accent bar on the left edge for non-root known nodes */}
       {!isRoot && statut !== 'inconnu' && (
-        <rect x={-72} y={-26} width={4} height={52} fill="#c8f000" />
+        <rect x={-(W / 2)} y={-(H / 2)} width={4} height={H} fill="#c8f000" />
       )}
       <rect
-        x={-68} y={-26} width={136} height={52}
+        x={-(W / 2)} y={-(H / 2)} width={W} height={H}
         fill={fill}
         stroke={stroke}
-        strokeWidth={statut === 'inconnu' ? 1 : 2}
+        strokeWidth={strokeWidth}
         strokeDasharray={statut === 'inconnu' ? '8 4' : undefined}
       />
-      <text y={-6} textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={12} fill={textColor}>
-        {nodeDatum.name.split(' ').slice(0, -1).join(' ')}
+      <text y={-8} textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={11} fill={textColor}>
+        {givenName}
       </text>
-      <text y={10} textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={12} fill={textColor}>
-        {nodeDatum.name.split(' ').pop()}
+      <text y={7} textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={11} fill={textColor}>
+        {surname}
       </text>
-      <text y={26} textAnchor="middle" fontFamily="'JetBrains Mono', monospace" fontSize={9} fill={isRoot ? '#5a5a5a' : '#6a6860'}>
+      <text y={22} textAnchor="middle" fontFamily="'JetBrains Mono', monospace" fontSize={9} fill={isRoot ? '#5a5a5a' : '#6a6860'}>
         {statut === 'inconnu' ? 'searching…' : `b. ${year}`}
       </text>
     </g>
@@ -62,7 +72,7 @@ export function TreeView({ treeData, arbre, onNodeClick }: Props) {
     if (!containerRef.current) return
     const { width, height } = containerRef.current.getBoundingClientRect()
     // root on right side, ancestors expand to the left
-    setTranslate({ x: width * 0.72, y: height * 0.5 })
+    setTranslate({ x: width * 0.62, y: height * 0.5 })
   }, [treeData])
 
   return (
@@ -76,7 +86,7 @@ export function TreeView({ treeData, arbre, onNodeClick }: Props) {
             orientation="horizontal"
             pathFunc="step"
             translate={translate}
-            nodeSize={{ x: 200, y: 90 }}
+            nodeSize={{ x: 220, y: 90 }}
             separation={{ siblings: 1.2, nonSiblings: 1.5 }}
             renderCustomNodeElement={rd3tProps =>
               CustomNode({
