@@ -6,18 +6,22 @@ Endpoints :
   POST /search                   → démarre l'agent récursif, retourne session_id
   GET  /stream/{session_id}      → SSE stream des événements de l'agent
   GET  /tree/{session_id}        → snapshot JSON de l'arbre (disponible après "done")
+  GET  /similar                  → recherche sémantique dans les ancêtres indexés (ChromaDB)
+  POST /admin                    → acte post-1900 : administration + courrier pré-rempli
 """
 import asyncio
 from typing import AsyncGenerator, Union
 from uuid import UUID, uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from agents.admin_agent import AdminResult, LienFamille, TypeActe, handle_post_1900
 from agents.ocr_agent import PersonHint
 from agents.recursive_agent import build_arbre
+from services.chromadb_service import search_similar, store_individu
 from config import settings
 from models.arbre import Arbre
 from models.events import SSEEvent
@@ -65,6 +69,16 @@ class AnswerRequest(BaseModel):
 
 class AnswerResponse(BaseModel):
     ok: bool
+
+
+class AdminRequest(BaseModel):
+    type_acte: TypeActe
+    nom: str
+    prenom: str | None = None
+    commune: str | None = None
+    annee: int = Field(ge=1901, le=2026)
+    lien: LienFamille
+    pays_naissance: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -168,3 +182,31 @@ async def get_tree(session_id: UUID):
         raise HTTPException(status_code=202, detail="Arbre en cours de construction")
 
     return arbre.model_dump()
+
+
+@app.get("/similar")
+async def similar(q: str = Query(..., min_length=2), n: int = Query(default=5, ge=1, le=20)):
+    """
+    Recherche sémantique dans les ancêtres indexés via ChromaDB.
+    Exemple : /similar?q=laboureur+Berry
+    Retourne les n individus les plus proches sémantiquement.
+    """
+    results = await search_similar(q, n_results=n)
+    return {"query": q, "results": results}
+
+
+@app.post("/admin", response_model=AdminResult)
+async def admin_post_1900(req: AdminRequest):
+    """
+    Pour un ancêtre dont l'acte est postérieur à 1900 (non disponible sur Arkotheque) :
+    détermine l'administration compétente et génère un courrier de demande pré-rempli.
+    """
+    return await handle_post_1900(
+        type_acte=req.type_acte,
+        nom=req.nom,
+        prenom=req.prenom,
+        commune=req.commune,
+        annee=req.annee,
+        lien=req.lien,
+        pays_naissance=req.pays_naissance,
+    )
