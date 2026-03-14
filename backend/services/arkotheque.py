@@ -230,3 +230,47 @@ async def get_image_bytes(url: str) -> bytes:
         resp = await client.get(url)
         resp.raise_for_status()
         return resp.content
+
+
+def _extract_image_ref(raw: dict) -> tuple[int | None, int | None]:
+    """
+    Extrait (id_arko_file, nb_pages) depuis le _source d'un hit Elasticsearch.
+
+    Arkotheque ne documente pas les noms de champs internes ; on essaie
+    les variantes connues. Retourne (None, None) si non trouvé.
+    """
+    id_arko_file = (
+        raw.get("idArkoFile")
+        or raw.get("id_arko_file")
+        or raw.get("imageId")
+        or raw.get("image_id")
+        or raw.get("idFichier")
+    )
+    nb_pages = (
+        raw.get("nbrPages")
+        or raw.get("nbPages")
+        or raw.get("nb_pages")
+        or raw.get("nombrePages")
+        or raw.get("nbrePages")
+    )
+    return id_arko_file, nb_pages
+
+
+def get_images_for_hit(base_url: str, hit: dict) -> list[str]:
+    """
+    Construit les URLs d'images pour un registre à partir d'un hit parsé.
+
+    Retourne [] si les métadonnées image sont absentes du hit
+    (cas de certains moteurs "browse" où le filtrage est côté client).
+    Dans ce cas, l'agent récursif doit ignorer ce registre ou tenter
+    une autre stratégie (ex : pagination + filtrage local, cf. B5).
+    """
+    fiche_id = hit.get("fiche_id")
+    raw = hit.get("raw", {})
+    id_arko_file, nb_pages = _extract_image_ref(raw)
+    if not fiche_id or not id_arko_file or not nb_pages:
+        return []
+    return [
+        f"{base_url}/_recherche-images/show/{fiche_id}/image/{id_arko_file}/{i}"
+        for i in range(int(nb_pages))
+    ]
