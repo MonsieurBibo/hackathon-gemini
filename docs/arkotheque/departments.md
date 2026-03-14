@@ -16,11 +16,15 @@ Dernière mise à jour : 2026-03-14
 | 5 | Soldats indexés — **PUBLICS** | 133 879 |
 | 9 | Annotations registres paroissiaux | (crowdsourcé) |
 
-### Moteur 1 — État civil
-- Widget refUnique : `arko_default_61011a8e5db65`
-- Filtre commune : `arko_default_61011b4c3eacb`
-- Filtre type d'acte : `arko_default_61011b4c4f010`
-- Filtre année : `arko_default_61011b4c62fc5`
+### Moteur 1 — État civil (browse)
+- Widget refUnique (moteurRef) : `arko_default_61011a8e5db65`
+- contenu_id : `2655739` (data-contenu de la page HTML)
+- restitution_ref : `arko_default_61011eb03aad2` (restits[0].refUnique)
+- Filtre commune (filtres[0].refUnique) : `arko_default_61011b4c3eacb` → mode=**input**, valeur plain (sans hash)
+- Filtre type d'acte (filtres[1].refUnique) : `arko_default_61011b4c4f010` → rebond-detail retourne 500
+- Filtre année (filtres[2].refUnique) : `arko_default_61011b4c62fc5` → rebond-detail retourne 500
+- ⚠️ Filtrer année et type **localement** depuis `intitule` (ex: "3E 2346 1843 - 1852")
+- Total affiché toujours faux (reste 11254), résultats filtrés correctement (34 pour Neuilly)
 
 ### Acte POC validé — Prudence Aimée PINÇON
 - Registre : 3E 2346 (Naissances 1843-1852)

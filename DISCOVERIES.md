@@ -30,11 +30,47 @@ Ce fichier regroupe les découvertes clés du projet. Pour la documentation dét
 - **Nouvelle** (Jura) : `routing.json` absent, formulaires UUID, images via `/images/{uuid}.jpg`
 - Détection : `GET /js/routing.json` → 200 (ancienne) ou 404 (nouvelle)
 
-### Format filtre — erreur initiale corrigée
-Le format minimal documenté initialement **ne fonctionne pas**. Il faut absolument ajouter `[op]=AND` et `[extras][mode]=select` à chaque filtre. Voir `docs/arkotheque-api.md`.
+### Format filtre — deux modes distincts (découverte 2026-03-14)
+
+Le code initial utilisait `extras[mode]=select` partout et les `fieldName` d'aggregation comme clés de filtre. **Faux sur les deux points.**
+
+**Ce qui marche vraiment (validé sur Cher dept 18) :**
+
+1. **Clé de filtre** = `filtres[i].refUnique` depuis l'endpoint `/_recherche-api/moteur` (ex: `arko_default_61011b4c3eacb`), PAS le `fieldName` des properties (ex: `arko_default_615ac9ea049ef`).
+
+2. **Mode** = `input` pour le filtre commune (valeur plain sans hash). Le mode `select` (avec hash `Nom[[arko_fiche_xxx]]`) n'est pas le bon pour le filtre commune de Cher.
+
+3. **`contenuIds[0]`** = obligatoire dans les params (valeur = data-contenu de la page HTML). Cher browse : `"2655739"`.
+
+4. La clé correcte se découvre via `rebond-detail` :
+   ```
+   GET /_recherche-api/rebond-detail/{moteurRef}/{filtreRef}/{terme}
+   → 302 Location : URL complète avec format exact des params
+   ```
+
+5. Le **total** dans la réponse reste toujours à la valeur non-filtrée (bug API). Seuls les **résultats** (`results[]`) sont filtrés. Filtrer année localement depuis `intitule`.
+
+6. Filtres année/type d'acte : `rebond-detail` retourne 500 → filtrer **localement** depuis `intitule` (ex: "3E 2346 1843 - 1852").
+
+**Résultats validés avec bon format (Cher, filtre commune Neuilly-en-Sancerre) :**
+- `total` affiché : 11254 (faux) — `results` retournés : 34 (correct)
+- `id=4082, intitule="3E 2346 1843 - 1852"` bien présent → ficheId confirmé
+
+### Pipeline render-fiche → idArkoFile (découverte 2026-03-14)
+
+Pour obtenir `idArkoFile` d'un registre :
+```
+GET /_recherche-api/render-fiche/{moteurRef}/{refUnique}/{restitutionRef}/detail/html
+→ HTML contenant data-visionneuse='{"idArkoFile": 1997, "refUniqueField": "...", ...}'
+```
+- `restitutionRef` = `restits[0].refUnique` depuis l'endpoint `moteur`. Cher : `arko_default_61011eb03aad2`.
+- L'`id` numérique du résultat search = le `ficheId` dans l'URL image.
+- nb_pages : pas dans la réponse → sonder `show/{ficheId}/image/{idArkoFile}/{n}` jusqu'à 404.
 
 ### Moteurs "browse" — filtrage côté client
 Sur Indre (recensement) et Meurthe-et-Moselle (matricules), les filtres ne réduisent pas le `total` serveur. Il faut paginer via `{moteurRef}--from=N` et filtrer localement.
+
+Pour les moteurs **état civil browse** (Cher moteur 1, Ardennes moteur 6) : le filtre commune marche pour les résultats mais le total reste faux. Le filtre année ne marche pas → filtrage local depuis `intitule`.
 
 ### Accès images — 100% public, aucune auth
 Confirmé sur 5 départements et 4 types d'actes. Aucun rate limiting détecté.
