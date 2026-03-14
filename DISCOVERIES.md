@@ -16,6 +16,7 @@ Ce fichier regroupe les découvertes clés du projet. Pour la documentation dét
 | `docs/project/competitive.md` | Analyse concurrentielle (généalogie + GS e-commerce) |
 | `docs/project/models.md` | Modèles Gemini et pricing |
 | `docs/project/genealogy-apis.md` | Research APIs généalogiques (FamilySearch, Geneanet, BnF…) |
+| `docs/frontend/TREE_LIBRARY_COMPARISON.md` | **NOUVEAU** — Comparaison D3.js, React Flow, vis-network, @visx, react-d3-tree + recommandation |
 | `docs/tasks/contracts.md` | Contrats JSON, SSE events, endpoints REST |
 | `docs/tasks/backend.md` | Tâches B0–B8 |
 | `docs/tasks/frontend.md` | Tâches F0–F6 |

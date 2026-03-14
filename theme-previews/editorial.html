@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f2ec;
+    --paper: #faf8f3;
+    --dark: #0f0f0d;
+    --mid: #3a3830;
+    --dim: #8a8678;
+    --border: #d8d4cc;
+    --accent: #e8380c;
+    --accent2: #ff6b3d;
+    --ink: #1a1914;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--dark);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER — MASTHEAD */
+  header {
+    background: var(--dark);
+    color: var(--paper);
+    padding: 0 32px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .masthead-left {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+  }
+
+  .masthead-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 0.05em;
+    color: var(--paper);
+    line-height: 1;
+  }
+
+  .masthead-super {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-left: 14px;
+    margin-bottom: 2px;
+    align-self: flex-end;
+  }
+
+  .masthead-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: #5a5850;
+    text-transform: uppercase;
+  }
+
+  .live-chip {
+    background: var(--accent);
+    color: white;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .live-dot {
+    width: 5px;
+    height: 5px;
+    background: white;
+    border-radius: 50%;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* LAYOUT */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr 272px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* LEFT PANEL */
+  .left {
+    border-right: 1px solid var(--border);
+    background: var(--paper);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .section-rule {
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    color: var(--dark);
+  }
+
+  .section-num {
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-left: auto;
+  }
+
+  .left-body {
+    padding: 16px 20px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .field {
+    margin-bottom: 12px;
+  }
+
+  .fl {
+    display: block;
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+
+  .fi {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--dark);
+    font-family: 'Instrument Serif', serif;
+    font-size: 17px;
+    padding: 4px 0 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .fi:focus {
+    border-color: var(--accent);
+  }
+
+  .fi::placeholder { color: var(--border); }
+
+  .fi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .gen-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .gen-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--dim);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    padding: 6px 0;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .gen-btn.active {
+    background: var(--dark);
+    border-color: var(--dark);
+    color: var(--paper);
+  }
+
+  .submit {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.15em;
+    padding: 12px 0;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background 0.2s;
+  }
+
+  .submit:hover { background: #c82c08; }
+
+  /* RESULTS */
+  .results-header {
+    padding: 14px 20px 10px;
+    border-top: 2px solid var(--dark);
+    margin-top: 16px;
+  }
+
+  .results-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.1em;
+    line-height: 1;
+  }
+
+  .results-sub {
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    margin-top: 3px;
+  }
+
+  .anc-card {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .anc-card:hover { padding-left: 8px; }
+  .anc-card:hover::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--accent);
+  }
+
+  .anc-gen {
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .anc-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 18px;
+    color: var(--dark);
+    line-height: 1.2;
+  }
+
+  .anc-name.dim {
+    font-style: italic;
+    color: var(--dim);
+  }
+
+  .anc-detail {
+    font-size: 9px;
+    color: var(--dim);
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  .anc-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 4px;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .dot-c { color: #2a7a2a; }
+  .dot-p { color: var(--accent); }
+  .dot-s { color: var(--dim); }
+  .dot { width: 4px; height: 4px; border-radius: 50%; display: inline-block; }
+  .dc { background: #2a7a2a; }
+  .dp { background: var(--accent); }
+  .ds { background: var(--dim); }
+
+  /* CENTER */
+  .center {
+    background: var(--bg);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* LARGE GEN COUNTER */
+  .gen-counter {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--dim);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .gen-counter-num {
+    font-size: 13px;
+    color: var(--dark);
+  }
+
+  .tree-container {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Paper texture lines */
+  .tree-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      180deg,
+      transparent,
+      transparent 31px,
+      var(--border) 31px,
+      var(--border) 32px
+    );
+    opacity: 0.3;
+  }
+
+  svg.tree {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .t-edge {
+    stroke: var(--border);
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  .t-edge.active { stroke: var(--dark); stroke-width: 1; }
+
+  .t-node { cursor: pointer; }
+
+  .t-node-bg {
+    fill: var(--paper);
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+
+  .t-node-bg.root {
+    fill: var(--dark);
+    stroke: var(--dark);
+  }
+
+  .t-node-bg.partial {
+    stroke: var(--dark);
+  }
+
+  .t-node-bg.searching {
+    fill: var(--bg);
+    stroke: var(--border);
+    stroke-dasharray: 5, 3;
+  }
+
+  .t-name { font-family: 'Instrument Serif', serif; }
+  .t-year { font-family: 'IBM Plex Mono', monospace; font-size: 9px; }
+
+  .accent-bar {
+    fill: var(--accent);
+  }
+
+  .zoom-btns {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 4px;
+  }
+
+  .z-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    color: var(--dark);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .z-btn:hover { background: var(--dark); color: var(--paper); }
+
+  /* RIGHT PANEL */
+  .right {
+    border-left: 1px solid var(--border);
+    background: var(--paper);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .agent-row {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .agent-row.active::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    width: 3px;
+    background: var(--accent);
+  }
+
+  .ar-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .ar-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 17px;
+    color: var(--dark);
+  }
+
+  .ar-badge {
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .badge-done { color: #2a7a2a; }
+  .badge-ocr { color: var(--accent); }
+  .badge-srch { color: var(--mid); }
+
+  .ar-msg {
+    font-size: 10px;
+    color: var(--dim);
+    line-height: 1.5;
+    margin-bottom: 7px;
+  }
+
+  .ar-prog {
+    height: 1.5px;
+    background: var(--border);
+    position: relative;
+  }
+
+  .ar-prog-fill {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+  }
+
+  .pf-done { background: #2a7a2a; width: 100%; }
+  .pf-ocr { background: var(--accent); width: 60%; }
+  .pf-srch { background: var(--mid); width: 28%; }
+
+  /* OCR */
+  .ocr-block {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-top: 2px solid var(--dark);
+  }
+
+  .ocr-label {
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ocr-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--dark);
+  }
+
+  .ocr-sub {
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    margin-left: auto;
+  }
+
+  .ocr-text {
+    flex: 1;
+    padding: 14px 18px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 13px;
+    color: var(--mid);
+    line-height: 1.9;
+    overflow-y: auto;
+    font-style: italic;
+  }
+
+  .ocr-text em {
+    font-style: normal;
+    color: var(--dark);
+    border-bottom: 1px solid var(--accent);
+    font-weight: normal;
+  }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 2px;
+    height: 14px;
+    background: var(--accent);
+    vertical-align: middle;
+    animation: blink 0.8s step-end infinite;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="masthead-left">
+    <div class="masthead-title">GenealogyAI</div>
+    <div class="masthead-super">Autonomous archive agent · France · 1789–1900</div>
+  </div>
+  <div class="masthead-right">
+    <span>Cher, FR</span>
+    <span style="color: #3a3830">·</span>
+    <span>Session a3f9</span>
+    <div class="live-chip"><div class="live-dot"></div>Live</div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="section-rule">
+      <div class="section-label">Search</div>
+      <div class="section-num">01 / 03</div>
+    </div>
+    <div class="left-body">
+      <div class="field">
+        <label class="fl">Family name</label>
+        <input class="fi" type="text" value="PINÇON">
+      </div>
+      <div class="field">
+        <label class="fl">Given name</label>
+        <input class="fi" type="text" value="Prudence Aimée">
+      </div>
+      <div class="fi-row">
+        <div class="field">
+          <label class="fl">Commune</label>
+          <input class="fi" type="text" value="Neuilly-en-Sancerre" style="font-size: 13px;">
+        </div>
+        <div class="field">
+          <label class="fl">Year</label>
+          <input class="fi" type="text" value="1843">
+        </div>
+      </div>
+      <div class="field">
+        <label class="fl">Generations</label>
+        <div class="gen-row">
+          <button class="gen-btn">I</button>
+          <button class="gen-btn active">II</button>
+          <button class="gen-btn">III</button>
+        </div>
+      </div>
+      <button class="submit">Search Archives</button>
+
+      <div class="results-header">
+        <div class="results-title">3 individuals found</div>
+        <div class="results-sub">Generation 3 in progress</div>
+      </div>
+
+      <div class="anc-card">
+        <div class="anc-gen">Gen I · Root</div>
+        <div class="anc-name">Prudence Aimée Pinçon</div>
+        <div class="anc-detail">b. 3 March 1843 · Neuilly-en-Sancerre</div>
+        <div class="anc-status dot-c"><span class="dot dc"></span>Complete</div>
+      </div>
+
+      <div class="anc-card">
+        <div class="anc-gen">Gen II · Father</div>
+        <div class="anc-name">Jean Pinçon</div>
+        <div class="anc-detail">b. ca. 1810 · Cher · laboureur</div>
+        <div class="anc-status dot-p"><span class="dot dp"></span>Partial</div>
+      </div>
+
+      <div class="anc-card">
+        <div class="anc-gen">Gen II · Mother</div>
+        <div class="anc-name">Jeanne Aimée Dalloy</div>
+        <div class="anc-detail">b. ca. 1815 · Cher</div>
+        <div class="anc-status dot-p"><span class="dot dp"></span>Partial</div>
+      </div>
+
+      <div class="anc-card">
+        <div class="anc-gen">Gen III · Searching</div>
+        <div class="anc-name dim">Unknown ancestor…</div>
+        <div class="anc-detail">Querying Arkotheque</div>
+        <div class="anc-status dot-s"><span class="dot ds"></span>In progress</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center">
+    <div class="gen-counter">
+      <span>Tracing lineage</span>
+      <span class="gen-counter-num">GEN. II → III</span>
+    </div>
+
+    <div class="tree-container">
+      <svg class="tree" viewBox="0 0 660 500">
+
+        <!-- Edges -->
+        <path class="t-edge active" d="M390,248 C310,248 310,155 230,155"/>
+        <path class="t-edge active" d="M390,248 C310,248 310,340 230,340"/>
+        <path class="t-edge" d="M230,155 C160,155 160,108 90,108"/>
+        <path class="t-edge" d="M230,155 C160,155 160,202 90,202"/>
+        <path class="t-edge" style="stroke-dasharray: 5,4; stroke: var(--dim);" d="M230,340 C160,340 160,293 90,293"/>
+        <path class="t-edge" style="stroke-opacity: 0.2;" d="M230,340 C160,340 160,387 90,387"/>
+
+        <!-- Root node -->
+        <g class="t-node">
+          <rect class="t-node-bg root" x="345" y="214" width="152" height="68" rx="0"/>
+          <rect class="accent-bar" x="345" y="214" width="3" height="68"/>
+          <text class="t-name" font-size="16" fill="#faf8f3" x="420" y="243" text-anchor="middle">Prudence Aimée</text>
+          <text class="t-name" font-size="16" fill="#faf8f3" x="420" y="262" text-anchor="middle">Pinçon</text>
+          <text class="t-year" fill="#8a8678" x="420" y="277" text-anchor="middle">b. 1843</text>
+        </g>
+
+        <!-- Father -->
+        <g class="t-node">
+          <rect class="t-node-bg partial" x="170" y="121" width="120" height="68" rx="0"/>
+          <text class="t-name" font-size="15" fill="var(--ink)" x="230" y="150" text-anchor="middle">Jean</text>
+          <text class="t-name" font-size="15" fill="var(--ink)" x="230" y="168" text-anchor="middle">Pinçon</text>
+          <text class="t-year" fill="var(--dim)" x="230" y="182" text-anchor="middle">ca. 1810</text>
+        </g>
+
+        <!-- Mother -->
+        <g class="t-node">
+          <rect class="t-node-bg partial" x="170" y="306" width="120" height="68" rx="0"/>
+          <text class="t-name" font-size="15" fill="var(--ink)" x="230" y="335" text-anchor="middle">Jeanne A.</text>
+          <text class="t-name" font-size="15" fill="var(--ink)" x="230" y="353" text-anchor="middle">Dalloy</text>
+          <text class="t-year" fill="var(--dim)" x="230" y="367" text-anchor="middle">ca. 1815</text>
+        </g>
+
+        <!-- Gf1 -->
+        <g class="t-node">
+          <rect class="t-node-bg" x="22" y="74" width="108" height="68" rx="0"/>
+          <text class="t-name" font-size="14" fill="var(--mid)" x="76" y="105" text-anchor="middle">Pierre</text>
+          <text class="t-name" font-size="14" fill="var(--mid)" x="76" y="121" text-anchor="middle">Pinçon</text>
+          <text class="t-year" fill="var(--dim)" x="76" y="136" text-anchor="middle">—</text>
+        </g>
+
+        <!-- Gm1 -->
+        <g class="t-node">
+          <rect class="t-node-bg" x="22" y="168" width="108" height="68" rx="0"/>
+          <text class="t-name" font-size="14" fill="var(--mid)" x="76" y="199" text-anchor="middle">Marie</text>
+          <text class="t-name" font-size="14" fill="var(--mid)" x="76" y="215" text-anchor="middle">Lefebvre</text>
+          <text class="t-year" fill="var(--dim)" x="76" y="230" text-anchor="middle">—</text>
+        </g>
+
+        <!-- Searching -->
+        <g class="t-node">
+          <rect class="t-node-bg searching" x="22" y="259" width="108" height="68" rx="0"/>
+          <text class="t-year" fill="var(--accent)" x="76" y="290" text-anchor="middle" font-size="9" letter-spacing="2">SEARCHING</text>
+          <text class="t-year" fill="var(--dim)" x="76" y="310" text-anchor="middle">· · ·</text>
+        </g>
+
+        <!-- Empty -->
+        <g class="t-node">
+          <rect x="22" y="353" width="108" height="68" fill="transparent" stroke="var(--border)" stroke-width="1" rx="0" stroke-opacity="0.3"/>
+        </g>
+
+        <!-- Generation labels -->
+        <text font-family="'Bebas Neue', sans-serif" font-size="11" fill="var(--dim)" letter-spacing="3" x="76" y="448" text-anchor="middle">GEN. III</text>
+        <text font-family="'Bebas Neue', sans-serif" font-size="11" fill="var(--dim)" letter-spacing="3" x="230" y="448" text-anchor="middle">GEN. II</text>
+        <text font-family="'Bebas Neue', sans-serif" font-size="11" fill="var(--dim)" letter-spacing="3" x="420" y="448" text-anchor="middle">GEN. I</text>
+
+        <!-- Divider lines -->
+        <line x1="76" y1="435" x2="76" y2="438" stroke="var(--dim)" stroke-width="1"/>
+        <line x1="230" y1="435" x2="230" y2="438" stroke="var(--dim)" stroke-width="1"/>
+        <line x1="420" y1="435" x2="420" y2="438" stroke="var(--dim)" stroke-width="1"/>
+      </svg>
+    </div>
+
+    <div class="zoom-btns">
+      <button class="z-btn">+</button>
+      <button class="z-btn">−</button>
+      <button class="z-btn" style="font-size: 12px;">⤢</button>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="section-rule">
+      <div class="section-label">Agents</div>
+      <div class="section-num">3 active</div>
+    </div>
+
+    <div class="agent-row">
+      <div class="ar-top">
+        <div class="ar-name">Jean Pinçon</div>
+        <div class="ar-badge badge-done">done ✓</div>
+      </div>
+      <div class="ar-msg">Birth record extracted — Cher 1810, p.14.</div>
+      <div class="ar-prog"><div class="ar-prog-fill pf-done"></div></div>
+    </div>
+
+    <div class="agent-row active">
+      <div class="ar-top">
+        <div class="ar-name">Jeanne Dalloy</div>
+        <div class="ar-badge badge-ocr">ocr →</div>
+      </div>
+      <div class="ar-msg">Reading décennal table 1810–1820…</div>
+      <div class="ar-prog"><div class="ar-prog-fill pf-ocr"></div></div>
+    </div>
+
+    <div class="agent-row">
+      <div class="ar-top">
+        <div class="ar-name">Pierre Pinçon</div>
+        <div class="ar-badge badge-srch">searching</div>
+      </div>
+      <div class="ar-msg">3 candidate records in Arkotheque.</div>
+      <div class="ar-prog"><div class="ar-prog-fill pf-srch"></div></div>
+    </div>
+
+    <div class="ocr-block">
+      <div class="ocr-label">
+        <div class="ocr-title">OCR Stream</div>
+        <div class="ocr-sub">Jeanne Dalloy · live</div>
+      </div>
+      <div class="ocr-text">
+        L'an mil huit cent quinze,
+        le <em>vingt-deux mars</em>, par-devant
+        nous officier de l'état civil de la
+        commune de <em>Neuilly-en-Sancerre</em>,
+        est comparu <em>Antoine Dalloy</em>,
+        cultivateur, âgé de quarante ans,
+        lequel nous a déclaré que
+        <em>Jeanne Aimée</em>, du sexe féminin,
+        est née ce jourd'hui à six heures
+        du matin, de lui déclarant et de
+        <em>Marie Françoise Bonnet</em>,
+        son épouse…<span class="cursor-blink"></span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

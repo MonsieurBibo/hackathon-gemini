@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Art Deco</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Barlow:wght@300;400;500&family=Barlow+Condensed:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e1520;
+    --surface: #121c2e;
+    --surface2: #172030;
+    --teal: #0d9488;
+    --teal-bright: #2dd4bf;
+    --teal-dim: #0a5e55;
+    --gold: #d4a84b;
+    --gold-dim: #8a6820;
+    --gold-pale: #f5e6c0;
+    --ivory: #f0ead8;
+    --ivory-dim: #b0a888;
+    --border: #1e3048;
+    --border-gold: rgba(212, 168, 75, 0.25);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ivory);
+    font-family: 'Barlow', sans-serif;
+    font-size: 12px;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ART DECO ORNAMENT PATTERN */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(13,148,136,0.08) 0%, transparent 60%),
+      radial-gradient(circle at 100% 100%, rgba(212,168,75,0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* HEADER */
+  header {
+    height: 56px;
+    display: flex;
+    align-items: stretch;
+    flex-shrink: 0;
+    position: relative;
+    border-bottom: 1px solid var(--border-gold);
+    background: var(--surface);
+  }
+
+  /* GOLD ACCENT LINES */
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--teal), var(--gold), transparent);
+  }
+
+  .h-brand {
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    gap: 14px;
+    border-right: 1px solid var(--border-gold);
+  }
+
+  /* DECO DIAMOND MARK */
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-mark::before {
+    content: '';
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--gold);
+    transform: rotate(45deg);
+  }
+
+  .brand-mark::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--teal);
+    transform: rotate(45deg);
+  }
+
+  .brand-mark-inner {
+    position: relative;
+    z-index: 1;
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    transform: rotate(45deg);
+  }
+
+  .brand-name {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    color: var(--ivory);
+    line-height: 1;
+  }
+
+  .brand-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .h-meta {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 24px;
+    flex: 1;
+  }
+
+  .h-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .h-meta-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 8px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--teal-dim);
+  }
+
+  .h-meta-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--ivory);
+  }
+
+  .h-live {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 24px;
+    border-left: 1px solid var(--border-gold);
+  }
+
+  .live-gem {
+    width: 8px;
+    height: 8px;
+    background: var(--teal-bright);
+    transform: rotate(45deg);
+    animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: rotate(45deg) scale(1); }
+    50% { opacity: 0.4; transform: rotate(45deg) scale(0.8); }
+  }
+
+  .live-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--teal-bright);
+    text-transform: uppercase;
+  }
+
+  /* LAYOUT */
+  .layout {
+    display: grid;
+    grid-template-columns: 268px 1fr 280px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .panel {
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-l { border-right: 1px solid var(--border-gold); }
+  .panel-r { border-left: 1px solid var(--border-gold); }
+
+  /* DECO PANEL HEADER */
+  .panel-head {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-gold);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-head::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 20px; right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+
+  .deco-bracket {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .deco-line {
+    width: 16px;
+    height: 1px;
+    background: var(--gold-dim);
+  }
+
+  .deco-diamond {
+    width: 5px;
+    height: 5px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  .ph-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ivory-dim);
+  }
+
+  .ph-count {
+    margin-left: auto;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    color: var(--teal-bright);
+    letter-spacing: 0.1em;
+  }
+
+  /* FORM */
+  .panel-body { padding: 18px 20px; overflow-y: auto; flex: 1; }
+
+  .field { margin-bottom: 14px; }
+
+  .fl {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--teal-dim);
+    margin-bottom: 5px;
+  }
+
+  .fi {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-gold);
+    color: var(--ivory);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .fi:focus {
+    border-color: var(--teal);
+    background: rgba(13, 148, 136, 0.05);
+  }
+
+  .fi::placeholder { color: #2a3a4a; }
+
+  .fi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .gen-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .gen-btn {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--ivory-dim);
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    padding: 7px 0;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .gen-btn.active {
+    background: rgba(13, 148, 136, 0.1);
+    border-color: var(--teal);
+    color: var(--teal-bright);
+  }
+
+  .gen-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 2px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px;
+    background: var(--teal-bright);
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  /* SUBMIT — DECO STYLE */
+  .submit-wrap {
+    position: relative;
+    margin-top: 6px;
+  }
+
+  .submit-wrap::before, .submit-wrap::after {
+    content: '◆';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    color: var(--gold);
+    z-index: 1;
+  }
+
+  .submit-wrap::before { left: 12px; }
+  .submit-wrap::after { right: 12px; }
+
+  .submit {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--teal);
+    color: var(--teal-bright);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.4em;
+    padding: 12px 32px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit:hover {
+    background: rgba(13, 148, 136, 0.12);
+    box-shadow: 0 0 20px rgba(45, 212, 191, 0.15), inset 0 0 20px rgba(45, 212, 191, 0.05);
+  }
+
+  /* RESULTS */
+  .results-deco {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 18px 0 14px;
+  }
+
+  .rd-line { flex: 1; height: 1px; background: var(--border-gold); }
+  .rd-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+  }
+  .rd-diamond {
+    width: 5px; height: 5px;
+    background: var(--gold-dim);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  .anc-card {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(30, 48, 72, 0.7);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    padding-left: 0;
+  }
+
+  .anc-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 60%;
+    background: var(--teal);
+    transition: width 0.2s;
+  }
+
+  .anc-card:hover::before { width: 2px; }
+  .anc-card:hover { padding-left: 10px; }
+
+  .anc-gen {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--teal-dim);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .anc-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--ivory);
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+
+  .anc-name.dim { font-style: italic; color: #3a4a5a; }
+
+  .anc-meta {
+    font-family: 'Barlow', sans-serif;
+    font-size: 10px;
+    color: var(--ivory-dim);
+    margin-bottom: 5px;
+  }
+
+  .anc-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .s-gem {
+    width: 5px; height: 5px;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  .sc { color: var(--teal-bright); }
+  .sc .s-gem { background: var(--teal-bright); }
+  .sp { color: var(--gold); }
+  .sp .s-gem { background: var(--gold); }
+  .ss { color: #3a4a5a; }
+  .ss .s-gem { background: #3a4a5a; }
+
+  /* CENTER */
+  .center {
+    background: var(--bg);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* DECO CORNER ORNAMENTS */
+  .deco-corner {
+    position: absolute;
+    z-index: 5;
+  }
+
+  .deco-corner svg { display: block; }
+
+  .dc-tl { top: 12px; left: 12px; }
+  .dc-tr { top: 12px; right: 12px; transform: scaleX(-1); }
+  .dc-bl { bottom: 12px; left: 12px; transform: scaleY(-1); }
+  .dc-br { bottom: 12px; right: 12px; transform: scale(-1); }
+
+  .tree-area {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  svg.tree { width: 100%; height: 100%; }
+
+  /* Tree styles */
+  .t-edge {
+    stroke: var(--border);
+    stroke-width: 1;
+    fill: none;
+  }
+
+  .t-edge.lit { stroke: var(--teal-dim); }
+
+  .node-bg {
+    fill: var(--surface);
+    stroke: var(--border-gold);
+    stroke-width: 1;
+  }
+
+  .node-bg.root { fill: var(--surface2); stroke: var(--teal); stroke-width: 1.5; }
+  .node-bg.partial { stroke: var(--gold-dim); }
+  .node-bg.ghost { fill: var(--bg); stroke: #1e3048; }
+  .node-bg.searching { fill: var(--bg); stroke: #1e3048; stroke-dasharray: 5, 3; }
+
+  .zoom-btns {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    z-index: 10;
+  }
+
+  .z-btn {
+    width: 30px;
+    height: 30px;
+    background: var(--surface);
+    border: 1px solid var(--border-gold);
+    color: var(--ivory-dim);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Barlow', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .z-btn:hover { border-color: var(--teal); color: var(--teal-bright); }
+
+  /* AGENT PANEL */
+  .agent-card {
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(30, 48, 72, 0.6);
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .agent-card.active { background: rgba(13, 148, 136, 0.04); }
+
+  .agent-card.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(var(--teal), var(--teal-bright), var(--teal));
+  }
+
+  .ac-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+
+  .ac-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--ivory);
+  }
+
+  .ac-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid;
+  }
+
+  .b-done { color: var(--teal-bright); border-color: rgba(45, 212, 191, 0.3); }
+  .b-ocr { color: var(--gold); border-color: rgba(212, 168, 75, 0.4); }
+  .b-search { color: var(--ivory-dim); border-color: rgba(176, 168, 136, 0.3); }
+
+  .ac-msg {
+    font-size: 10px;
+    color: var(--ivory-dim);
+    line-height: 1.5;
+    margin-bottom: 8px;
+    font-weight: 300;
+  }
+
+  .ac-prog {
+    height: 1px;
+    background: var(--border);
+    position: relative;
+  }
+
+  .ac-fill {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+  }
+
+  .af-done { background: var(--teal-bright); width: 100%; }
+  .af-ocr { background: var(--gold); width: 58%; box-shadow: 0 0 6px rgba(212, 168, 75, 0.4); }
+  .af-search { background: var(--ivory-dim); width: 26%; }
+
+  /* OCR */
+  .ocr-block {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-top: 1px solid var(--border-gold);
+  }
+
+  .ocr-head {
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(30, 48, 72, 0.6);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ocr-gem {
+    width: 6px; height: 6px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .ocr-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .ocr-sub {
+    font-size: 9px;
+    color: #2a3a4a;
+    letter-spacing: 0.1em;
+    margin-left: auto;
+  }
+
+  .ocr-text {
+    flex: 1;
+    padding: 14px 20px;
+    font-family: 'Playfair Display', serif;
+    font-size: 12.5px;
+    color: #3a5060;
+    font-style: italic;
+    line-height: 1.9;
+    overflow-y: auto;
+  }
+
+  .ocr-text em {
+    font-style: normal;
+    color: var(--ivory-dim);
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 13px;
+    background: var(--teal-bright);
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-brand">
+    <div class="brand-mark"><div class="brand-mark-inner"></div></div>
+    <div class="brand-name">
+      <div class="brand-title">GenealogyAI</div>
+      <div class="brand-sub">Archives · France · 1789–1900</div>
+    </div>
+  </div>
+  <div class="h-meta">
+    <div class="h-meta-item">
+      <div class="h-meta-label">Department</div>
+      <div class="h-meta-val">18 — Cher</div>
+    </div>
+    <div class="h-meta-item">
+      <div class="h-meta-label">Session</div>
+      <div class="h-meta-val">A3F9-B2C1</div>
+    </div>
+    <div class="h-meta-item">
+      <div class="h-meta-label">Generation</div>
+      <div class="h-meta-val">II → III</div>
+    </div>
+    <div class="h-live">
+      <div class="live-gem"></div>
+      <div class="live-text">Live</div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT -->
+  <div class="panel panel-l">
+    <div class="panel-head">
+      <div class="deco-bracket">
+        <div class="deco-line"></div>
+        <div class="deco-diamond"></div>
+      </div>
+      <div class="ph-label">Search Query</div>
+      <div class="deco-bracket">
+        <div class="deco-diamond"></div>
+        <div class="deco-line"></div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="field">
+        <label class="fl">Family name</label>
+        <input class="fi" type="text" value="PINÇON">
+      </div>
+      <div class="field">
+        <label class="fl">Given name</label>
+        <input class="fi" type="text" value="Prudence Aimée">
+      </div>
+      <div class="fi-row">
+        <div class="field">
+          <label class="fl">Commune</label>
+          <input class="fi" type="text" value="Neuilly-en-Sancerre" style="font-size: 11px;">
+        </div>
+        <div class="field">
+          <label class="fl">Year</label>
+          <input class="fi" type="text" value="1843">
+        </div>
+      </div>
+      <div class="field">
+        <label class="fl">Generations</label>
+        <div class="gen-row">
+          <button class="gen-btn">I</button>
+          <button class="gen-btn active">II</button>
+          <button class="gen-btn">III</button>
+        </div>
+      </div>
+      <div class="submit-wrap">
+        <button class="submit">Trace Lineage</button>
+      </div>
+
+      <div class="results-deco">
+        <div class="rd-line"></div>
+        <div class="rd-diamond"></div>
+        <div class="rd-label">3 Discovered</div>
+        <div class="rd-diamond"></div>
+        <div class="rd-line"></div>
+      </div>
+
+      <div class="anc-card">
+        <div class="anc-gen">Generation I · Root</div>
+        <div class="anc-name">Prudence Aimée Pinçon</div>
+        <div class="anc-meta">b. 3 March 1843 · Neuilly-en-Sancerre</div>
+        <div class="anc-status sc"><span class="s-gem"></span>Complete</div>
+      </div>
+
+      <div class="anc-card">
+        <div class="anc-gen">Generation II · Father</div>
+        <div class="anc-name">Jean Pinçon</div>
+        <div class="anc-meta">b. ca. 1810 · Cher · laboureur</div>
+        <div class="anc-status sp"><span class="s-gem"></span>Partial</div>
+      </div>
+
+      <div class="anc-card">
+        <div class="anc-gen">Generation II · Mother</div>
+        <div class="anc-name">Jeanne Aimée Dalloy</div>
+        <div class="anc-meta">b. ca. 1815 · Cher</div>
+        <div class="anc-status sp"><span class="s-gem"></span>Partial</div>
+      </div>
+
+      <div class="anc-card">
+        <div class="anc-gen">Generation III · Searching</div>
+        <div class="anc-name dim">Unknown ancestor…</div>
+        <div class="anc-meta">Querying Arkotheque</div>
+        <div class="anc-status ss"><span class="s-gem"></span>In Progress</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center">
+
+    <!-- Corner ornaments -->
+    <div class="deco-corner dc-tl">
+      <svg width="32" height="32" viewBox="0 0 32 32">
+        <path d="M2,2 L2,16 M2,2 L16,2" stroke="rgba(212,168,75,0.35)" stroke-width="1" fill="none"/>
+        <rect x="0" y="0" width="4" height="4" fill="rgba(212,168,75,0.4)" transform="rotate(45 2 2)"/>
+      </svg>
+    </div>
+    <div class="deco-corner dc-tr">
+      <svg width="32" height="32" viewBox="0 0 32 32">
+        <path d="M2,2 L2,16 M2,2 L16,2" stroke="rgba(212,168,75,0.35)" stroke-width="1" fill="none"/>
+        <rect x="0" y="0" width="4" height="4" fill="rgba(212,168,75,0.4)" transform="rotate(45 2 2)"/>
+      </svg>
+    </div>
+    <div class="deco-corner dc-bl">
+      <svg width="32" height="32" viewBox="0 0 32 32">
+        <path d="M2,2 L2,16 M2,2 L16,2" stroke="rgba(212,168,75,0.35)" stroke-width="1" fill="none"/>
+        <rect x="0" y="0" width="4" height="4" fill="rgba(212,168,75,0.4)" transform="rotate(45 2 2)"/>
+      </svg>
+    </div>
+    <div class="deco-corner dc-br">
+      <svg width="32" height="32" viewBox="0 0 32 32">
+        <path d="M2,2 L2,16 M2,2 L16,2" stroke="rgba(212,168,75,0.35)" stroke-width="1" fill="none"/>
+        <rect x="0" y="0" width="4" height="4" fill="rgba(212,168,75,0.4)" transform="rotate(45 2 2)"/>
+      </svg>
+    </div>
+
+    <div class="tree-area">
+      <svg class="tree" viewBox="0 0 660 500">
+        <!-- Subtle center diamond -->
+        <polygon points="330,240 340,250 330,260 320,250" fill="none" stroke="rgba(212,168,75,0.15)" stroke-width="1"/>
+
+        <!-- Edges -->
+        <path class="t-edge lit" d="M390,250 C310,250 310,158 230,158"/>
+        <path class="t-edge lit" d="M390,250 C310,250 310,342 230,342"/>
+        <path class="t-edge" d="M230,158 C162,158 162,110 92,110"/>
+        <path class="t-edge" d="M230,158 C162,158 162,206 92,206"/>
+        <path class="t-edge" d="M230,342 C162,342 162,294 92,294" stroke="#1e3048" stroke-dasharray="4,4"/>
+        <path class="t-edge" d="M230,342 C162,342 162,388 92,388" stroke="#141e2a" stroke-width="0.5"/>
+
+        <!-- Root -->
+        <rect class="node-bg root" x="348" y="218" width="154" height="64" rx="1"/>
+        <line x1="348" y1="222" x2="348" y2="278" stroke="var(--teal)" stroke-width="2"/>
+        <text font-family="'Playfair Display', serif" font-size="15" fill="#f0ead8" x="425" y="244" text-anchor="middle">Prudence Aimée</text>
+        <text font-family="'Playfair Display', serif" font-size="15" fill="#f0ead8" x="425" y="262" text-anchor="middle">Pinçon</text>
+        <text font-family="'Barlow Condensed', monospace" font-size="9" fill="var(--teal-dim)" x="425" y="276" text-anchor="middle" letter-spacing="1">b. 1843</text>
+
+        <!-- Father -->
+        <rect class="node-bg partial" x="168" y="126" width="124" height="64" rx="1"/>
+        <text font-family="'Playfair Display', serif" font-size="15" fill="#f0ead8" x="230" y="152" text-anchor="middle">Jean</text>
+        <text font-family="'Playfair Display', serif" font-size="15" fill="#f0ead8" x="230" y="170" text-anchor="middle">Pinçon</text>
+        <text font-family="'Barlow Condensed', monospace" font-size="9" fill="var(--ivory-dim)" x="230" y="184" text-anchor="middle" letter-spacing="1">ca. 1810</text>
+
+        <!-- Mother -->
+        <rect class="node-bg partial" x="168" y="310" width="124" height="64" rx="1"/>
+        <text font-family="'Playfair Display', serif" font-size="15" fill="#f0ead8" x="230" y="336" text-anchor="middle">Jeanne A.</text>
+        <text font-family="'Playfair Display', serif" font-size="15" fill="#f0ead8" x="230" y="354" text-anchor="middle">Dalloy</text>
+        <text font-family="'Barlow Condensed', monospace" font-size="9" fill="var(--ivory-dim)" x="230" y="368" text-anchor="middle" letter-spacing="1">ca. 1815</text>
+
+        <!-- GF1 -->
+        <rect class="node-bg" x="22" y="78" width="112" height="64" rx="1"/>
+        <text font-family="'Playfair Display', serif" font-size="14" fill="#3a5060" x="78" y="107" text-anchor="middle">Pierre</text>
+        <text font-family="'Playfair Display', serif" font-size="14" fill="#3a5060" x="78" y="124" text-anchor="middle">Pinçon</text>
+        <text font-family="'Barlow Condensed', monospace" font-size="9" fill="#1e3048" x="78" y="137" text-anchor="middle">—</text>
+
+        <!-- GM1 -->
+        <rect class="node-bg" x="22" y="174" width="112" height="64" rx="1"/>
+        <text font-family="'Playfair Display', serif" font-size="14" fill="#3a5060" x="78" y="203" text-anchor="middle">Marie</text>
+        <text font-family="'Playfair Display', serif" font-size="14" fill="#3a5060" x="78" y="220" text-anchor="middle">Lefebvre</text>
+        <text font-family="'Barlow Condensed', monospace" font-size="9" fill="#1e3048" x="78" y="233" text-anchor="middle">—</text>
+
+        <!-- Searching -->
+        <rect class="node-bg searching" x="22" y="262" width="112" height="64" rx="1"/>
+        <polygon points="78,282 84,288 78,294 72,288" fill="none" stroke="rgba(212,168,75,0.3)" stroke-width="1"/>
+        <text font-family="'Barlow Condensed', sans-serif" font-size="9" fill="#2a4050" x="78" y="312" text-anchor="middle" letter-spacing="2">SEARCHING</text>
+
+        <!-- Empty -->
+        <rect x="22" y="356" width="112" height="64" rx="1" fill="transparent" stroke="rgba(30,48,72,0.4)" stroke-width="1"/>
+
+        <!-- Gen labels with deco -->
+        <polygon points="78,448 82,452 78,456 74,452" fill="rgba(212,168,75,0.3)"/>
+        <text font-family="'Barlow Condensed', sans-serif" font-size="10" fill="var(--border)" letter-spacing="3" x="78" y="468" text-anchor="middle">GEN III</text>
+        <polygon points="230,448 234,452 230,456 226,452" fill="rgba(212,168,75,0.3)"/>
+        <text font-family="'Barlow Condensed', sans-serif" font-size="10" fill="var(--border)" letter-spacing="3" x="230" y="468" text-anchor="middle">GEN II</text>
+        <polygon points="425,448 429,452 425,456 421,452" fill="rgba(13,148,136,0.5)"/>
+        <text font-family="'Barlow Condensed', sans-serif" font-size="10" fill="var(--border)" letter-spacing="3" x="425" y="468" text-anchor="middle">GEN I</text>
+      </svg>
+    </div>
+
+    <div class="zoom-btns">
+      <button class="z-btn">+</button>
+      <button class="z-btn">−</button>
+      <button class="z-btn" style="font-size: 10px;">⤢</button>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="panel panel-r">
+    <div class="panel-head">
+      <div class="deco-bracket">
+        <div class="deco-line"></div>
+        <div class="deco-diamond"></div>
+      </div>
+      <div class="ph-label">Agents</div>
+      <div class="ph-count">3 active</div>
+    </div>
+
+    <div class="agent-card">
+      <div class="ac-row">
+        <div class="ac-name">Jean Pinçon</div>
+        <div class="ac-badge b-done">done</div>
+      </div>
+      <div class="ac-msg">Birth record extracted — Cher 1810, p.14.</div>
+      <div class="ac-prog"><div class="ac-fill af-done"></div></div>
+    </div>
+
+    <div class="agent-card active">
+      <div class="ac-row">
+        <div class="ac-name">Jeanne Dalloy</div>
+        <div class="ac-badge b-ocr">ocr</div>
+      </div>
+      <div class="ac-msg">Reading décennal 1810–1820, Neuilly…</div>
+      <div class="ac-prog"><div class="ac-fill af-ocr"></div></div>
+    </div>
+
+    <div class="agent-card">
+      <div class="ac-row">
+        <div class="ac-name">Pierre Pinçon</div>
+        <div class="ac-badge b-search">searching</div>
+      </div>
+      <div class="ac-msg">3 candidate records in Arkotheque.</div>
+      <div class="ac-prog"><div class="ac-fill af-search"></div></div>
+    </div>
+
+    <div class="ocr-block">
+      <div class="ocr-head">
+        <div class="ocr-gem"></div>
+        <div class="ocr-title">OCR Stream</div>
+        <div class="ocr-sub">Jeanne Dalloy · live</div>
+      </div>
+      <div class="ocr-text">
+        L'an mil huit cent quinze, le
+        <em>vingt-deux mars</em>, par-devant
+        nous officier de l'état civil
+        de la commune de
+        <em>Neuilly-en-Sancerre</em>,
+        est comparu
+        <em>Antoine Dalloy</em>,
+        cultivateur, âgé de quarante
+        ans, demeurant audit lieu,
+        lequel nous a déclaré que
+        <em>Jeanne Aimée</em>, du sexe
+        féminin, est née ce jourd'hui
+        à six heures du matin, de
+        lui déclarant et de
+        <em>Marie Françoise Bonnet</em>,
+        son épouse…<span class="cursor"></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

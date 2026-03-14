@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brutalist</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f0ede6;
+    --white: #f8f6f0;
+    --black: #0a0a0a;
+    --lime: #c8f000;
+    --lime-dark: #a0c000;
+    --gray: #c8c4bc;
+    --mid: #6a6860;
+    --border: 2px solid var(--black);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--black);
+    font-family: 'Archivo', sans-serif;
+    font-size: 11px;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--black);
+    height: 52px;
+    display: flex;
+    align-items: stretch;
+    flex-shrink: 0;
+    border-bottom: var(--border);
+  }
+
+  .h-logo {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-right: var(--border);
+    background: var(--lime);
+    gap: 10px;
+  }
+
+  .h-logo-text {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+    color: var(--black);
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .h-logo-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--black);
+    opacity: 0.6;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  .h-info {
+    display: flex;
+    align-items: stretch;
+    flex: 1;
+  }
+
+  .h-cell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 16px;
+    border-right: 1px solid #2a2a2a;
+  }
+
+  .h-cell-label {
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #5a5a5a;
+    margin-bottom: 2px;
+  }
+
+  .h-cell-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--white);
+    letter-spacing: 0.03em;
+  }
+
+  .h-live {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 10px;
+    border-left: 1px solid #2a2a2a;
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--lime);
+    border-radius: 50%;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .live-label {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--lime);
+  }
+
+  /* MAIN */
+  .layout {
+    display: grid;
+    grid-template-columns: 272px 1fr 280px;
+    flex: 1;
+    overflow: hidden;
+    border-top: none;
+  }
+
+  /* PANELS */
+  .left {
+    border-right: var(--border);
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .right {
+    border-left: var(--border);
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-head {
+    background: var(--black);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-head-title {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    color: var(--lime);
+    text-transform: uppercase;
+  }
+
+  .panel-head-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #5a5a5a;
+  }
+
+  .panel-body {
+    padding: 16px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* FORM */
+  .field { margin-bottom: 10px; }
+
+  .fl {
+    display: block;
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .fi {
+    width: 100%;
+    background: var(--bg);
+    border: 2px solid var(--black);
+    color: var(--black);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 7px 10px;
+    outline: none;
+    transition: background 0.15s;
+  }
+
+  .fi:focus { background: #e8f8a0; }
+  .fi::placeholder { color: var(--gray); }
+
+  .fi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .gen-row { display: flex; gap: 0; margin-top: 4px; }
+
+  .gen-btn {
+    flex: 1;
+    background: var(--bg);
+    border: 2px solid var(--black);
+    margin-left: -2px;
+    color: var(--black);
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 20px;
+    padding: 8px 0;
+    cursor: pointer;
+    text-align: center;
+    position: relative;
+    transition: all 0.1s;
+  }
+
+  .gen-btn:first-child { margin-left: 0; }
+
+  .gen-btn.active {
+    background: var(--lime);
+    z-index: 1;
+  }
+
+  .submit {
+    width: 100%;
+    background: var(--black);
+    border: 2px solid var(--black);
+    color: var(--lime);
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    padding: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-top: 6px;
+    transition: all 0.15s;
+  }
+
+  .submit:hover { background: var(--lime); color: var(--black); }
+
+  /* DIVIDER */
+  .divider-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 14px 0 10px;
+    border-top: 2px solid var(--black);
+    border-bottom: 2px solid var(--black);
+    padding: 5px 0;
+  }
+
+  .divider-label {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--black);
+  }
+
+  .divider-count {
+    margin-left: auto;
+    background: var(--lime);
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11px;
+    padding: 0 6px;
+  }
+
+  /* ANCESTOR CARDS */
+  .anc {
+    border: 2px solid var(--black);
+    margin-bottom: 6px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s;
+    background: var(--white);
+  }
+
+  .anc:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--black); }
+
+  .anc-top {
+    padding: 8px 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .anc-gen-tag {
+    background: var(--black);
+    color: var(--lime);
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+  }
+
+  .anc-status-tag {
+    margin-left: auto;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  .st-complete { color: #2a6a2a; }
+  .st-partial { color: #8a4a00; }
+  .st-searching { color: var(--mid); }
+
+  .anc-name {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    color: var(--black);
+    padding: 4px 10px 0;
+    line-height: 1.2;
+  }
+
+  .anc-name.dim { color: var(--mid); font-style: italic; }
+
+  .anc-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--mid);
+    padding: 2px 10px 8px;
+  }
+
+  .anc-bar {
+    height: 4px;
+    background: var(--gray);
+    position: relative;
+  }
+
+  .anc-bar-fill {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+  }
+
+  .bf-complete { background: #2a6a2a; width: 100%; }
+  .bf-partial { background: #f0a020; width: 55%; }
+  .bf-searching { background: var(--lime-dark); width: 20%; animation: grow 1.5s ease-in-out infinite alternate; }
+
+  @keyframes grow { to { width: 35%; } }
+
+  /* CENTER */
+  .center {
+    background: var(--bg);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* BIG COUNTER */
+  .big-gen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    pointer-events: none;
+    padding: 16px 20px;
+    z-index: 0;
+  }
+
+  .big-gen-text {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 180px;
+    line-height: 0.85;
+    color: rgba(10,10,10,0.04);
+    letter-spacing: -0.05em;
+    user-select: none;
+  }
+
+  .tree-area {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  svg.tree {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .t-edge {
+    stroke: var(--black);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .t-edge.ghost { stroke: var(--gray); stroke-dasharray: 6, 4; stroke-width: 1.5; }
+
+  .node-box {
+    fill: var(--white);
+    stroke: var(--black);
+    stroke-width: 2;
+  }
+
+  .node-box.root { fill: var(--black); }
+  .node-box.searching { fill: var(--bg); stroke: var(--gray); stroke-width: 2; stroke-dasharray: 8, 4; }
+
+  .ctrl-row {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
+  }
+
+  .ctrl {
+    width: 36px;
+    height: 36px;
+    background: var(--white);
+    border: 2px solid var(--black);
+    color: var(--black);
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s;
+  }
+
+  .ctrl:hover { background: var(--lime); }
+
+  /* AGENT CARDS */
+  .agent {
+    border-bottom: 2px solid var(--black);
+    padding: 10px 14px;
+    position: relative;
+  }
+
+  .agent.active { background: #f0f8d8; }
+
+  .ag-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .ag-name {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+  }
+
+  .ag-badge {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border: 2px solid currentColor;
+  }
+
+  .b-done { color: #2a6a2a; }
+  .b-ocr { color: var(--black); background: var(--lime); border-color: var(--black); }
+  .b-search { color: var(--mid); }
+
+  .ag-msg {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    color: var(--mid);
+    line-height: 1.5;
+    margin-bottom: 7px;
+  }
+
+  .ag-prog {
+    height: 4px;
+    background: var(--gray);
+    position: relative;
+  }
+
+  .ag-prog-fill {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+  }
+
+  .pf-done { background: #2a6a2a; width: 100%; }
+  .pf-ocr { background: var(--black); width: 60%; }
+  .pf-search { background: var(--mid); width: 28%; }
+
+  /* OCR */
+  .ocr-zone {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-top: 2px solid var(--black);
+  }
+
+  .ocr-head {
+    background: var(--black);
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ocr-head-label {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--lime);
+    text-transform: uppercase;
+  }
+
+  .ocr-head-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: #4a4a4a;
+    margin-left: auto;
+  }
+
+  .ocr-body {
+    flex: 1;
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    line-height: 1.9;
+    overflow-y: auto;
+    word-break: break-word;
+    background: var(--bg);
+  }
+
+  .ocr-body .hl {
+    color: var(--black);
+    font-weight: 400;
+    background: var(--lime);
+    padding: 0 2px;
+  }
+
+  .blink {
+    display: inline-block;
+    width: 8px;
+    height: 12px;
+    background: var(--black);
+    vertical-align: middle;
+    animation: blink 0.8s step-end infinite;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-logo">
+    <div>
+      <div class="h-logo-text">Genealogy<br>AI</div>
+    </div>
+  </div>
+  <div class="h-info">
+    <div class="h-cell">
+      <div class="h-cell-label">Department</div>
+      <div class="h-cell-val">18 — CHER</div>
+    </div>
+    <div class="h-cell">
+      <div class="h-cell-label">Session</div>
+      <div class="h-cell-val">a3f9-b2c1</div>
+    </div>
+    <div class="h-cell">
+      <div class="h-cell-label">Generation</div>
+      <div class="h-cell-val">02 / 03</div>
+    </div>
+    <div class="h-cell">
+      <div class="h-cell-label">Agents</div>
+      <div class="h-cell-val">03 active</div>
+    </div>
+    <div class="h-live">
+      <div class="live-dot"></div>
+      <div class="live-label">LIVE</div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="panel-head">
+      <div class="panel-head-title">Search</div>
+    </div>
+    <div class="panel-body">
+
+      <div class="field">
+        <label class="fl">Family name</label>
+        <input class="fi" type="text" value="PINÇON">
+      </div>
+      <div class="field">
+        <label class="fl">Given name</label>
+        <input class="fi" type="text" value="Prudence Aimée">
+      </div>
+      <div class="fi-row">
+        <div class="field">
+          <label class="fl">Commune</label>
+          <input class="fi" type="text" value="Neuilly-en-Sancerre" style="font-size: 10px;">
+        </div>
+        <div class="field">
+          <label class="fl">Year</label>
+          <input class="fi" type="text" value="1843">
+        </div>
+      </div>
+      <div class="field">
+        <label class="fl">Generations</label>
+        <div class="gen-row">
+          <button class="gen-btn">I</button>
+          <button class="gen-btn active">II</button>
+          <button class="gen-btn">III</button>
+        </div>
+      </div>
+      <button class="submit">→ Search</button>
+
+      <div class="divider-row">
+        <span class="divider-label">Found</span>
+        <span class="divider-count">3</span>
+      </div>
+
+      <div class="anc">
+        <div class="anc-top">
+          <span class="anc-gen-tag">GEN-01</span>
+          <span class="anc-status-tag st-complete">● Complete</span>
+        </div>
+        <div class="anc-name">Prudence A. Pinçon</div>
+        <div class="anc-meta">b. 03/03/1843 · Neuilly-en-Sancerre</div>
+        <div class="anc-bar"><div class="anc-bar-fill bf-complete"></div></div>
+      </div>
+
+      <div class="anc">
+        <div class="anc-top">
+          <span class="anc-gen-tag">GEN-02</span>
+          <span class="anc-status-tag st-partial">◐ Partial</span>
+        </div>
+        <div class="anc-name">Jean Pinçon</div>
+        <div class="anc-meta">b. ca.1810 · laboureur</div>
+        <div class="anc-bar"><div class="anc-bar-fill bf-partial"></div></div>
+      </div>
+
+      <div class="anc">
+        <div class="anc-top">
+          <span class="anc-gen-tag">GEN-02</span>
+          <span class="anc-status-tag st-partial">◐ Partial</span>
+        </div>
+        <div class="anc-name">Jeanne A. Dalloy</div>
+        <div class="anc-meta">b. ca.1815 · Cher</div>
+        <div class="anc-bar"><div class="anc-bar-fill bf-partial" style="width: 38%;"></div></div>
+      </div>
+
+      <div class="anc">
+        <div class="anc-top">
+          <span class="anc-gen-tag">GEN-03</span>
+          <span class="anc-status-tag st-searching">○ Searching</span>
+        </div>
+        <div class="anc-name dim">Unknown…</div>
+        <div class="anc-meta">Querying Arkotheque</div>
+        <div class="anc-bar"><div class="anc-bar-fill bf-searching"></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center">
+    <div class="big-gen">
+      <div class="big-gen-text">G2</div>
+    </div>
+    <div class="tree-area">
+      <svg class="tree" viewBox="0 0 660 500">
+        <!-- Edges -->
+        <path class="t-edge" d="M390,250 C310,250 310,158 230,158"/>
+        <path class="t-edge" d="M390,250 C310,250 310,342 230,342"/>
+        <path class="t-edge" d="M230,158 C162,158 162,110 94,110"/>
+        <path class="t-edge" d="M230,158 C162,158 162,206 94,206"/>
+        <path class="t-edge ghost" d="M230,342 C162,342 162,294 94,294"/>
+        <path class="t-edge ghost" d="M230,342 C162,342 162,390 94,390"/>
+
+        <!-- Root -->
+        <rect class="node-box root" x="350" y="218" width="158" height="64" rx="0"/>
+        <text font-family="'Archivo Black', sans-serif" font-size="15" fill="#c8f000" x="429" y="244" text-anchor="middle">Prudence Aimée</text>
+        <text font-family="'Archivo Black', sans-serif" font-size="15" fill="#c8f000" x="429" y="262" text-anchor="middle">Pinçon</text>
+        <text font-family="'JetBrains Mono', monospace" font-size="9" fill="#5a5a5a" x="429" y="276" text-anchor="middle">b. 1843</text>
+
+        <!-- Father -->
+        <rect class="node-box" x="168" y="126" width="124" height="64" rx="0"/>
+        <rect x="168" y="126" width="4" height="64" fill="#c8f000"/>
+        <text font-family="'Archivo Black', sans-serif" font-size="15" fill="#0a0a0a" x="242" y="152" text-anchor="middle">Jean</text>
+        <text font-family="'Archivo Black', sans-serif" font-size="15" fill="#0a0a0a" x="242" y="170" text-anchor="middle">Pinçon</text>
+        <text font-family="'JetBrains Mono', monospace" font-size="9" fill="#6a6860" x="242" y="184" text-anchor="middle">ca. 1810</text>
+
+        <!-- Mother -->
+        <rect class="node-box" x="168" y="310" width="124" height="64" rx="0"/>
+        <rect x="168" y="310" width="4" height="64" fill="#c8f000"/>
+        <text font-family="'Archivo Black', sans-serif" font-size="15" fill="#0a0a0a" x="242" y="336" text-anchor="middle">Jeanne A.</text>
+        <text font-family="'Archivo Black', sans-serif" font-size="15" fill="#0a0a0a" x="242" y="354" text-anchor="middle">Dalloy</text>
+        <text font-family="'JetBrains Mono', monospace" font-size="9" fill="#6a6860" x="242" y="368" text-anchor="middle">ca. 1815</text>
+
+        <!-- GF1 -->
+        <rect x="26" y="78" width="112" height="64" rx="0" fill="#f8f6f0" stroke="#0a0a0a" stroke-width="2"/>
+        <text font-family="'Archivo Black', sans-serif" font-size="14" fill="#0a0a0a" x="82" y="108" text-anchor="middle">Pierre</text>
+        <text font-family="'Archivo Black', sans-serif" font-size="14" fill="#0a0a0a" x="82" y="124" text-anchor="middle">Pinçon</text>
+        <text font-family="'JetBrains Mono', monospace" font-size="9" fill="#6a6860" x="82" y="136" text-anchor="middle">?</text>
+
+        <!-- GM1 -->
+        <rect x="26" y="174" width="112" height="64" rx="0" fill="#f8f6f0" stroke="#0a0a0a" stroke-width="2"/>
+        <text font-family="'Archivo Black', sans-serif" font-size="14" fill="#0a0a0a" x="82" y="204" text-anchor="middle">Marie</text>
+        <text font-family="'Archivo Black', sans-serif" font-size="14" fill="#0a0a0a" x="82" y="220" text-anchor="middle">Lefebvre</text>
+        <text font-family="'JetBrains Mono', monospace" font-size="9" fill="#6a6860" x="82" y="232" text-anchor="middle">?</text>
+
+        <!-- Searching -->
+        <rect class="node-box searching" x="26" y="262" width="112" height="64" rx="0"/>
+        <text font-family="'Archivo Black', sans-serif" font-size="9" fill="#6a6860" x="82" y="294" text-anchor="middle" letter-spacing="2">SEARCHING</text>
+        <text font-family="'JetBrains Mono', monospace" font-size="12" fill="#c8c4bc" x="82" y="314" text-anchor="middle">. . .</text>
+
+        <!-- Empty -->
+        <rect x="26" y="358" width="112" height="64" rx="0" fill="transparent" stroke="#c8c4bc" stroke-width="1.5"/>
+
+        <!-- Gen labels -->
+        <text font-family="'Archivo Black', sans-serif" font-size="10" fill="#c8c4bc" letter-spacing="3" x="82" y="454" text-anchor="middle">GEN III</text>
+        <text font-family="'Archivo Black', sans-serif" font-size="10" fill="#c8c4bc" letter-spacing="3" x="230" y="454" text-anchor="middle">GEN II</text>
+        <text font-family="'Archivo Black', sans-serif" font-size="10" fill="#c8c4bc" letter-spacing="3" x="429" y="454" text-anchor="middle">GEN I</text>
+      </svg>
+    </div>
+
+    <div class="ctrl-row">
+      <button class="ctrl">+</button>
+      <button class="ctrl">−</button>
+      <button class="ctrl" style="font-size: 14px;">⤢</button>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="panel-head">
+      <div class="panel-head-title">Agents</div>
+      <div class="panel-head-count">3 active</div>
+    </div>
+
+    <div class="agent">
+      <div class="ag-top">
+        <div class="ag-name">Jean Pinçon</div>
+        <div class="ag-badge b-done">done ✓</div>
+      </div>
+      <div class="ag-msg">Birth record extracted — Cher 1810, p.14.</div>
+      <div class="ag-prog"><div class="ag-prog-fill pf-done"></div></div>
+    </div>
+
+    <div class="agent active">
+      <div class="ag-top">
+        <div class="ag-name">Jeanne Dalloy</div>
+        <div class="ag-badge b-ocr">OCR</div>
+      </div>
+      <div class="ag-msg">Décennal table 1810–1820, Neuilly…</div>
+      <div class="ag-prog"><div class="ag-prog-fill pf-ocr"></div></div>
+    </div>
+
+    <div class="agent">
+      <div class="ag-top">
+        <div class="ag-name">Pierre Pinçon</div>
+        <div class="ag-badge b-search">searching</div>
+      </div>
+      <div class="ag-msg">3 candidate records in index.</div>
+      <div class="ag-prog"><div class="ag-prog-fill pf-search"></div></div>
+    </div>
+
+    <div class="ocr-zone">
+      <div class="ocr-head">
+        <span class="ocr-head-label">OCR Stream</span>
+        <span class="ocr-head-sub">Dalloy · live</span>
+      </div>
+      <div class="ocr-body">
+        L'an mil huit cent quinze,
+        le <span class="hl">vingt-deux mars</span>,
+        par-devant nous officier
+        de la commune de
+        <span class="hl">Neuilly-en-Sancerre</span>,
+        est comparu <span class="hl">Antoine Dalloy</span>,
+        cultivateur, âgé de
+        quarante ans, lequel nous
+        a déclaré que <span class="hl">Jeanne Aimée</span>,
+        du sexe féminin, est née
+        ce jourd'hui à six heures
+        du matin, de lui déclarant
+        et de <span class="hl">Marie Françoise Bonnet</span>,
+        son épouse…<span class="blink"></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
