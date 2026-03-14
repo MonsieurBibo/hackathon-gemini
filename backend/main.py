@@ -2,18 +2,8 @@ from typing import Union
 from uuid import UUID
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, conint
-from pydantic_settings import BaseSettings, SettingsConfigDict
-
-
-class Settings(BaseSettings):
-    gemini_api_key: str = ""
-    cors_origins: list[str] = ["http://localhost:5173"]
-
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
-
-
-settings = Settings()
+from pydantic import BaseModel, Field
+from config import settings
 
 app = FastAPI(title="GenealogyAI")
 
